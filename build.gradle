@@ -39,12 +39,13 @@ dependencies {
     implementation('com.dlsc.formsfx:formsfx-core:11.6.0') {
         exclude(group: 'org.openjfx')
     }
+
     implementation('net.synedra:validatorfx:0.5.0') {
         exclude(group: 'org.openjfx')
     }
     implementation('org.kordamp.ikonli:ikonli-javafx:12.3.1')
     implementation('org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0')
-    implementation('eu.hansolo:tilesfx:21.0.3') {
+    implementation ('eu.hansolo:tilesfx:11.48') {
         exclude(group: 'org.openjfx')
     }
     implementation('com.github.almasb:fxgl:17.3') {
