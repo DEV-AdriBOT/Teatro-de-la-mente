@@ -264,6 +264,7 @@
       border-radius: 8px;
       transition: left 0.1s, top 0.1s;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 2;
     }
 
     .platform {
@@ -271,6 +272,7 @@
       background: #4db6ac;
       border-radius: 4px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 1;
     }
 
     .object {
@@ -280,6 +282,33 @@
       background: #ff4081;
       border-radius: 50%;
       animation: pulse 2s infinite;
+      z-index: 3;
+    }
+
+    .enemy {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: #d32f2f;
+      border-radius: 8px;
+      animation: float 3s infinite;
+    }
+
+    .health-bar {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0,0,0,0.5);
+      width: 200px;
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .health-fill {
+      height: 100%;
+      background: #4db6ac;
+      transition: width 0.3s;
     }
 
     @keyframes pulse {
@@ -288,18 +317,9 @@
       100% { transform: scale(1); }
     }
 
-    .dialog-box {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 70%;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 20px;
-      border-radius: var(--border-radius);
-      color: white;
-      text-align: center;
-      backdrop-filter: blur(5px);
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
 
     @media (max-width: 768px) {
@@ -526,7 +546,70 @@
   let currentDialog = null;
   let isJumping = false;
   let velocityY = 0;
-  const GRAVITY = 0.5;
+  let GRAVITY = 0.5;
+  let currentHealth = 100;
+  let isGrounded = false;
+  let enemies = [];
+  let keys = {};
+
+  function updateHealth() {
+    const fill = document.getElementById('healthFill');
+    if (fill) fill.style.width = `${currentHealth}%`;
+  }
+
+  function checkPlatformCollision() {
+    const playerRect = {
+      x: playerPosition.x,
+      y: playerPosition.y,
+      width: 40,
+      height: 40
+    };
+
+    isGrounded = false;
+
+    document.querySelectorAll('.platform').forEach(platform => {
+      const platRect = platform.getBoundingClientRect();
+
+      if (playerRect.x < platRect.x + platRect.width &&
+        playerRect.x + playerRect.width > platRect.x &&
+        playerRect.y + playerRect.height >= platRect.y &&
+        playerRect.y < platRect.y + platRect.height) {
+
+        if (velocityY > 0) {
+          playerPosition.y = platRect.y - playerRect.height;
+          velocityY = 0;
+          isGrounded = true;
+        }
+      }
+    });
+  }
+
+  function checkEnemyCollision() {
+    const playerRect = {
+      x: playerPosition.x,
+      y: playerPosition.y,
+      width: 40,
+      height: 40
+    };
+
+    document.querySelectorAll('.enemy').forEach(enemy => {
+      const enemyRect = enemy.getBoundingClientRect();
+
+      if (playerRect.x < enemyRect.x + enemyRect.width &&
+        playerRect.x + playerRect.width > enemyRect.x &&
+        playerRect.y < enemyRect.y + enemyRect.height &&
+        playerRect.y + playerRect.height > enemyRect.y) {
+
+        currentHealth -= 10;
+        updateHealth();
+        if (currentHealth <= 0) {
+          alert(translations[currentLanguage]['continue']);
+          currentAct = 1;
+          showScreen('startScreen');
+        }
+      }
+    });
+  }
 
   function toggleFullscreen() {
     if (!document.fullscreenElement) {
@@ -592,29 +675,32 @@
           { x: 100, y: 500, width: 200, height: 20 },
           { x: 400, y: 400, width: 150, height: 20 },
           { x: 200, y: 300, width: 150, height: 20 },
-          { x: 600, y: 250, width: 100, height: 20 } // final del nivel
+          { x: 600, y: 250, width: 100, height: 20 }
         ],
         objects: [
-          { x: 250, y: 450, type: 'disappearing' },
-          { x: 450, y: 350, type: 'disappearing' },
-          { x: 620, y: 200, type: 'memory' } // objeto especial que finaliza el acto
+          { x: 250, y: 450, type: 'health', value: 30 },
+          { x: 450, y: 350, type: 'doubleJump' },
+          { x: 620, y: 200, type: 'memory' }
         ],
-        dialog: "¿Dónde estoy...? Todo parece... irreal. Como si hubiese olvidado algo importante."
+        dialog: "¿Dónde estoy...? Estos seres... parecen alimentarse de mis recuerdos."
       }
-
-      // Aquí puedes añadir el Acto II más adelante.
     };
 
     const act = acts[actNumber];
     const container = document.getElementById('actContainer');
 
     showCurtain(act.name, () => {
+      container.innerHTML = '<div class="health-bar"><div class="health-fill" id="healthFill"></div></div>';
+      updateHealth();
       loadBackground(act.bg, container);
       playMusic(act.music);
       initPlayer(container);
       createPlatforms(act.platforms, container);
       createObjects(act.objects, container);
+      createEnemies(act.platforms, container);
       showDialog(act.dialog);
+
+      setInterval(checkEnemyCollision, 100);
     });
   }
 
@@ -678,6 +764,27 @@
     });
   }
 
+  function createEnemies(platforms, container) {
+    platforms.forEach(plat => {
+      if (Math.random() > 0.7) {
+        const enemy = document.createElement('div');
+        enemy.className = 'enemy';
+        enemy.style.left = `${plat.x + 10}px`;
+        enemy.style.top = `${plat.y - 40}px`;
+        container.appendChild(enemy);
+
+        let direction = 1;
+        setInterval(() => {
+          const currentLeft = parseInt(enemy.style.left) || 0;
+          if (currentLeft > plat.x + plat.width - 40 || currentLeft < plat.x) {
+            direction *= -1;
+          }
+          enemy.style.left = `${currentLeft + (direction * 2)}px`;
+        }, 50);
+      }
+    });
+  }
+
   function createObjects(objects, container) {
     objects.forEach(obj => {
       const object = document.createElement('div');
@@ -686,26 +793,34 @@
       object.style.top = `${obj.y}px`;
       object.dataset.type = obj.type;
 
-      // Evento para objetos tipo 'memory'
+      if (obj.type === 'health') {
+        object.style.background = '#00C853';
+        object.addEventListener('click', () => {
+          currentHealth = Math.min(100, currentHealth + obj.value);
+          updateHealth();
+          object.remove();
+        });
+      }
+
+      if (obj.type === 'doubleJump') {
+        object.style.background = '#FFD600';
+        object.addEventListener('click', () => {
+          GRAVITY = 0.3;
+          setTimeout(() => GRAVITY = 0.5, 10000);
+          object.remove();
+        });
+      }
+
       if (obj.type === 'memory') {
         object.addEventListener('click', () => {
-          showDialog("Una voz en mi cabeza susurra... \"Sigue adelante.\"");
-
-          setTimeout(() => {
-            showDialog("Tal vez lo olvidé... para no sentir. Pero ahora, recordar duele menos que ignorar.");
-
-            setTimeout(() => {
-              currentAct = 2;
-              startAct(2); // Solo si tienes el Acto II listo o como placeholder
-            }, 6000);
-          }, 5000);
+          showDialog("El objeto emite un brillo... ¡Recuerdo algo!");
+          setTimeout(() => currentAct = 2, 3000);
         });
       }
 
       container.appendChild(object);
     });
   }
-
 
   function initPlayer(container) {
     const player = document.createElement('div');
@@ -718,12 +833,15 @@
     };
 
     function gameLoop() {
-      if (!checkCollisionBottom()) {
-        playerPosition.y += velocityY;
+      checkPlatformCollision();
+
+      if (!isGrounded) {
         velocityY += GRAVITY;
-      } else {
-        velocityY = 0;
       }
+
+      playerPosition.y += velocityY;
+
+      playerPosition.x = Math.max(0, Math.min(window.innerWidth - 40, playerPosition.x));
 
       player.style.left = `${playerPosition.x}px`;
       player.style.top = `${playerPosition.y}px`;
@@ -732,40 +850,40 @@
     }
 
     document.addEventListener('keydown', (e) => {
+      keys[e.key] = true;
+    });
+
+    document.addEventListener('keyup', (e) => {
+      keys[e.key] = false;
+    });
+
+    function handleControls() {
       const speed = 8;
       const jumpForce = -12;
 
-      switch(e.key) {
-        case 'ArrowLeft':
-          playerPosition.x -= speed;
-          break;
-        case 'ArrowRight':
-          playerPosition.x += speed;
-          break;
-        case 'ArrowUp':
-          if (checkCollisionBottom()) {
-            velocityY = jumpForce;
-          }
-          break;
+      if (keys['ArrowLeft'] || keys['a']) {
+        playerPosition.x -= speed;
       }
+      if (keys['ArrowRight'] || keys['d']) {
+        playerPosition.x += speed;
+      }
+      if ((keys['ArrowUp'] || keys['w']) && isGrounded) {
+        velocityY = jumpForce;
+        isGrounded = false;
+      }
+    }
 
-      playerPosition.x = Math.max(0, Math.min(window.innerWidth - 40, playerPosition.x));
-    });
-
+    setInterval(handleControls, 1000/60);
     gameLoop();
-  }
-
-  function checkCollisionBottom() {
-    return playerPosition.y >= window.innerHeight - 100;
   }
 
   function showDialog(text, duration = 5000) {
     const dialog = document.createElement('div');
     dialog.className = 'dialog-box';
     dialog.innerHTML = `
-                <p>${text}</p>
-                <button class="btn" onclick="closeDialog()" data-i18n="continue">Continuar</button>
-            `;
+      <p>${text}</p>
+      <button class="btn" onclick="closeDialog()" data-i18n="continue">Continuar</button>
+    `;
     document.body.appendChild(dialog);
     currentDialog = dialog;
     document.getElementById('skipBtn').style.display = 'block';
