@@ -591,14 +591,18 @@
         platforms: [
           { x: 100, y: 500, width: 200, height: 20 },
           { x: 400, y: 400, width: 150, height: 20 },
-          { x: 200, y: 300, width: 150, height: 20 }
+          { x: 200, y: 300, width: 150, height: 20 },
+          { x: 600, y: 250, width: 100, height: 20 } // final del nivel
         ],
         objects: [
           { x: 250, y: 450, type: 'disappearing' },
-          { x: 450, y: 350, type: 'disappearing' }
+          { x: 450, y: 350, type: 'disappearing' },
+          { x: 620, y: 200, type: 'memory' } // objeto especial que finaliza el acto
         ],
-        dialog: "¿Dónde estoy? Todo parece... irreal."
+        dialog: "¿Dónde estoy...? Todo parece... irreal. Como si hubiese olvidado algo importante."
       }
+
+      // Aquí puedes añadir el Acto II más adelante.
     };
 
     const act = acts[actNumber];
@@ -681,9 +685,27 @@
       object.style.left = `${obj.x}px`;
       object.style.top = `${obj.y}px`;
       object.dataset.type = obj.type;
+
+      // Evento para objetos tipo 'memory'
+      if (obj.type === 'memory') {
+        object.addEventListener('click', () => {
+          showDialog("Una voz en mi cabeza susurra... \"Sigue adelante.\"");
+
+          setTimeout(() => {
+            showDialog("Tal vez lo olvidé... para no sentir. Pero ahora, recordar duele menos que ignorar.");
+
+            setTimeout(() => {
+              currentAct = 2;
+              startAct(2); // Solo si tienes el Acto II listo o como placeholder
+            }, 6000);
+          }, 5000);
+        });
+      }
+
       container.appendChild(object);
     });
   }
+
 
   function initPlayer(container) {
     const player = document.createElement('div');
