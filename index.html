@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Variables de diseño coherentes con tu estilo */
     :root {
       --primary: #4db6ac;
       --primary-light: #80cbc4;
@@ -53,7 +52,6 @@
       transition: width 0.1s linear;
     }
 
-    /* Estilo de las pantallas del juego */
     .screen {
       position: fixed;
       width: 100%;
@@ -73,7 +71,6 @@
       opacity: 1;
     }
 
-    /* Pantalla de inicio - Estilo glass card */
     #startScreen {
       background: rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(10px);
@@ -103,7 +100,6 @@
       margin: 0 auto;
     }
 
-    /* Botones mejorados */
     .btn-group {
       display: flex;
       flex-wrap: wrap;
@@ -146,12 +142,6 @@
       background: rgba(77, 182, 172, 0.1);
     }
 
-    /* Pantalla de ajustes mejorada */
-    #settingsScreen {
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
-    }
-
     .settings-container {
       background: rgba(255, 255, 255, 0.3);
       backdrop-filter: blur(5px);
@@ -169,18 +159,6 @@
       text-align: center;
     }
 
-    .settings-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .settings-label {
-      display: block;
-      margin-bottom: 0.5rem;
-      color: var(--dark);
-      font-weight: 600;
-    }
-
-    /* Selector de idioma mejorado */
     .language-selector {
       position: relative;
       width: 100%;
@@ -211,12 +189,6 @@
       color: var(--primary-dark);
     }
 
-    /* Slider de volumen */
-    .volume-control {
-      width: 100%;
-      margin-top: 0.5rem;
-    }
-
     .volume-slider {
       width: 100%;
       height: 8px;
@@ -237,58 +209,6 @@
       cursor: pointer;
     }
 
-    /* Checkbox moderno */
-    .toggle-switch {
-      position: relative;
-      display: inline-block;
-      width: 60px;
-      height: 30px;
-    }
-
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(255, 255, 255, 0.3);
-      transition: .4s;
-      border-radius: 34px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 22px;
-      width: 22px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background-color: var(--primary);
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(30px);
-    }
-
-    .toggle-label {
-      margin-left: 1rem;
-      vertical-align: middle;
-    }
-
-    /* Telón teatral */
     .curtain {
       position: fixed;
       top: 0;
@@ -319,26 +239,69 @@
       letter-spacing: 0.5rem;
     }
 
-    /* Efectos de transición */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    .fullscreen-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: var(--glass-light);
+      backdrop-filter: blur(5px);
+      border: 1px solid var(--glass-border);
     }
 
-    @keyframes slideUp {
-      from { transform: translateY(50px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    .skip-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
     }
 
-    .fade-in {
-      animation: fadeIn 0.5s ease-in-out;
+    .player {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      position: absolute;
+      border-radius: 8px;
+      transition: left 0.1s, top 0.1s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
-    .slide-up {
-      animation: slideUp 0.5s ease-out;
+    .platform {
+      position: absolute;
+      background: #4db6ac;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
-    /* Responsive */
+    .object {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: #ff4081;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .dialog-box {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      color: white;
+      text-align: center;
+      backdrop-filter: blur(5px);
+    }
+
     @media (max-width: 768px) {
       .game-title {
         font-size: 2.5rem;
@@ -358,7 +321,15 @@
 <body>
 <div class="scroll-progress"></div>
 
-<!-- Pantallas del juego -->
+<button class="btn fullscreen-btn" id="fullscreenBtn">
+  <i class="fas fa-expand"></i>
+</button>
+
+<button class="btn skip-btn" id="skipBtn" style="display: none;">
+  <i class="fas fa-forward"></i>
+  <span data-i18n="skip">Saltar</span>
+</button>
+
 <div id="startScreen" class="screen active">
   <div class="game-header slide-up">
     <h1 class="game-title" data-i18n="title">Teatro de la Mente</h1>
@@ -407,17 +378,6 @@
     </div>
 
     <div class="settings-group">
-      <label class="settings-label" data-i18n="fullscreen">Pantalla completa</label>
-      <div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="fullscreenToggle">
-          <span class="slider"></span>
-        </label>
-        <span class="toggle-label" data-i18n="fullscreenOption">Activar/Desactivar</span>
-      </div>
-    </div>
-
-    <div class="settings-group">
       <label class="settings-label" data-i18n="subtitles">Subtítulos</label>
       <div>
         <label class="toggle-switch">
@@ -451,7 +411,6 @@
 </div>
 
 <script>
-  // game.js - Versión mejorada
   const translations = {
     es: {
       title: "Teatro de la Mente",
@@ -463,12 +422,12 @@
       save: "Guardar",
       language: "Idioma",
       volume: "Volumen",
-      fullscreen: "Pantalla completa",
-      fullscreenOption: "Activar/Desactivar",
       subtitles: "Subtítulos",
       subtitlesOption: "Activar/Desactivar",
       theEnd: "FIN",
-      returnMenu: "Volver al menú"
+      returnMenu: "Volver al menú",
+      skip: "Saltar",
+      continue: "Continuar"
     },
     en: {
       title: "Theater of the Mind",
@@ -480,12 +439,12 @@
       save: "Save",
       language: "Language",
       volume: "Volume",
-      fullscreen: "Fullscreen",
-      fullscreenOption: "Enable/Disable",
       subtitles: "Subtitles",
       subtitlesOption: "Enable/Disable",
       theEnd: "THE END",
-      returnMenu: "Return to menu"
+      returnMenu: "Return to menu",
+      skip: "Skip",
+      continue: "Continue"
     },
     fr: {
       title: "Théâtre de l'Esprit",
@@ -497,12 +456,12 @@
       save: "Sauvegarder",
       language: "Langue",
       volume: "Volume",
-      fullscreen: "Plein écran",
-      fullscreenOption: "Activer/Désactiver",
       subtitles: "Sous-titres",
       subtitlesOption: "Activer/Désactiver",
       theEnd: "FIN",
-      returnMenu: "Retour au menu"
+      returnMenu: "Retour au menu",
+      skip: "Passer",
+      continue: "Continuer"
     },
     de: {
       title: "Theater des Geistes",
@@ -514,29 +473,29 @@
       save: "Speichern",
       language: "Sprache",
       volume: "Lautstärke",
-      fullscreen: "Vollbild",
-      fullscreenOption: "Aktivieren/Deaktivieren",
       subtitles: "Untertitel",
       subtitlesOption: "Aktivieren/Deaktivieren",
       theEnd: "ENDE",
-      returnMenu: "Zurück zum Menü"
+      returnMenu: "Zurück zum Menü",
+      skip: "Überspringen",
+      continue: "Fortsetzen"
     },
     it: {
       title: "Teatro della Mente",
       subtitle: "Un viaggio psicologico attraverso cinque atti emotivi",
-      play: "Gioca",
+      play: "Giocare",
       settings: "Impostazioni",
-      exit: "Esci",
+      exit: "Uscita",
       back: "Indietro",
       save: "Salva",
       language: "Lingua",
       volume: "Volume",
-      fullscreen: "Schermo intero",
-      fullscreenOption: "Attiva/Disattiva",
       subtitles: "Sottotitoli",
-      subtitlesOption: "Attiva/Disattiva",
+      subtitlesOption: "Attivare/Disattivare",
       theEnd: "FINE",
-      returnMenu: "Torna al menu"
+      returnMenu: "Torna al menu",
+      skip: "Saltare",
+      continue: "Continua"
     },
     pt: {
       title: "Teatro da Mente",
@@ -548,12 +507,12 @@
       save: "Salvar",
       language: "Idioma",
       volume: "Volume",
-      fullscreen: "Tela cheia",
-      fullscreenOption: "Ativar/Desativar",
       subtitles: "Legendas",
       subtitlesOption: "Ativar/Desativar",
       theEnd: "FIM",
-      returnMenu: "Voltar ao menu"
+      returnMenu: "Voltar ao menu",
+      skip: "Pular",
+      continue: "Continuar"
     }
   };
 
@@ -562,31 +521,40 @@
   let playerPosition = { x: 0, y: 0 };
   let settings = {
     volume: 70,
-    fullscreen: false,
     subtitles: true
   };
+  let currentDialog = null;
+  let isJumping = false;
+  let velocityY = 0;
+  const GRAVITY = 0.5;
 
-  // Cargar configuración guardada
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error('Error al intentar pantalla completa:', err);
+      });
+      document.getElementById('fullscreenBtn').innerHTML = '<i class="fas fa-compress"></i>';
+    } else {
+      document.exitFullscreen();
+      document.getElementById('fullscreenBtn').innerHTML = '<i class="fas fa-expand"></i>';
+    }
+  }
+
   function loadSettings() {
     const savedSettings = localStorage.getItem('theaterOfMindSettings');
     if (savedSettings) {
       settings = JSON.parse(savedSettings);
       document.getElementById('volumeSlider').value = settings.volume;
-      document.getElementById('fullscreenToggle').checked = settings.fullscreen;
       document.getElementById('subtitlesToggle').checked = settings.subtitles;
     }
   }
 
-  // Guardar configuración
   function saveSettings() {
     settings.volume = document.getElementById('volumeSlider').value;
-    settings.fullscreen = document.getElementById('fullscreenToggle').checked;
     settings.subtitles = document.getElementById('subtitlesToggle').checked;
 
     localStorage.setItem('theaterOfMindSettings', JSON.stringify(settings));
     showScreen('startScreen');
-
-    // Mostrar notificación de guardado
     alert(translations[currentLanguage]['save'] + ' ✓');
   }
 
@@ -616,26 +584,33 @@
 
   function startAct(actNumber) {
     const acts = {
-      1: { bg: 'act1_background.png', music: 'music_act1.mp3', name: 'El Olvido' },
-      2: { bg: 'act2_background.png', music: 'music_act2.mp3', name: 'El Miedo' },
-      3: { bg: 'act3_background.png', music: 'music_act3.mp3', name: 'La Culpa' },
-      4: { bg: 'act4_background.png', music: 'music_act4.mp3', name: 'La Ira' },
-      5: { bg: 'act5_background.png', music: 'music_act5.mp3', name: 'La Aceptación' }
+      1: {
+        bg: 'act1_background.png',
+        music: 'music_act1.mp3',
+        name: 'El Olvido',
+        platforms: [
+          { x: 100, y: 500, width: 200, height: 20 },
+          { x: 400, y: 400, width: 150, height: 20 },
+          { x: 200, y: 300, width: 150, height: 20 }
+        ],
+        objects: [
+          { x: 250, y: 450, type: 'disappearing' },
+          { x: 450, y: 350, type: 'disappearing' }
+        ],
+        dialog: "¿Dónde estoy? Todo parece... irreal."
+      }
     };
 
     const act = acts[actNumber];
     const container = document.getElementById('actContainer');
 
-    // Mostrar telón de transición
     showCurtain(act.name, () => {
-      // Cargar fondo
       loadBackground(act.bg, container);
-
-      // Iniciar música
       playMusic(act.music);
-
-      // Inicializar jugador
       initPlayer(container);
+      createPlatforms(act.platforms, container);
+      createObjects(act.objects, container);
+      showDialog(act.dialog);
     });
   }
 
@@ -643,13 +618,9 @@
     const curtain = document.getElementById('curtain');
     const curtainText = curtain.querySelector('.curtain-text');
 
-    // Actualizar texto del telón
     curtainText.textContent = actName;
-
-    // Mostrar telón
     curtain.classList.add('active');
 
-    // Esperar y ocultar
     setTimeout(() => {
       curtain.classList.remove('active');
       if (callback) callback();
@@ -691,23 +662,56 @@
     }
   }
 
+  function createPlatforms(platforms, container) {
+    platforms.forEach(plat => {
+      const platform = document.createElement('div');
+      platform.className = 'platform';
+      platform.style.width = `${plat.width}px`;
+      platform.style.height = `${plat.height}px`;
+      platform.style.left = `${plat.x}px`;
+      platform.style.top = `${plat.y}px`;
+      container.appendChild(platform);
+    });
+  }
+
+  function createObjects(objects, container) {
+    objects.forEach(obj => {
+      const object = document.createElement('div');
+      object.className = 'object';
+      object.style.left = `${obj.x}px`;
+      object.style.top = `${obj.y}px`;
+      object.dataset.type = obj.type;
+      container.appendChild(object);
+    });
+  }
+
   function initPlayer(container) {
     const player = document.createElement('div');
     player.className = 'player';
     container.appendChild(player);
 
-    // Posición inicial
     playerPosition = {
-      x: window.innerWidth / 2 - 25,
-      y: window.innerHeight / 2 - 25
+      x: 100,
+      y: 100
     };
 
-    player.style.left = `${playerPosition.x}px`;
-    player.style.top = `${playerPosition.y}px`;
+    function gameLoop() {
+      if (!checkCollisionBottom()) {
+        playerPosition.y += velocityY;
+        velocityY += GRAVITY;
+      } else {
+        velocityY = 0;
+      }
 
-    // Controles
+      player.style.left = `${playerPosition.x}px`;
+      player.style.top = `${playerPosition.y}px`;
+
+      requestAnimationFrame(gameLoop);
+    }
+
     document.addEventListener('keydown', (e) => {
-      const speed = 10;
+      const speed = 8;
+      const jumpForce = -12;
 
       switch(e.key) {
         case 'ArrowLeft':
@@ -717,61 +721,70 @@
           playerPosition.x += speed;
           break;
         case 'ArrowUp':
-          playerPosition.y -= speed;
+          if (checkCollisionBottom()) {
+            velocityY = jumpForce;
+          }
           break;
-        case 'ArrowDown':
-          playerPosition.y += speed;
-          break;
-        case 'Escape':
-          showScreen('startScreen');
-          return;
       }
 
-      // Limitar movimiento dentro de la pantalla
-      playerPosition.x = Math.max(0, Math.min(window.innerWidth - 50, playerPosition.x));
-      playerPosition.y = Math.max(0, Math.min(window.innerHeight - 50, playerPosition.y));
-
-      player.style.left = `${playerPosition.x}px`;
-      player.style.top = `${playerPosition.y}px`;
+      playerPosition.x = Math.max(0, Math.min(window.innerWidth - 40, playerPosition.x));
     });
+
+    gameLoop();
+  }
+
+  function checkCollisionBottom() {
+    return playerPosition.y >= window.innerHeight - 100;
+  }
+
+  function showDialog(text, duration = 5000) {
+    const dialog = document.createElement('div');
+    dialog.className = 'dialog-box';
+    dialog.innerHTML = `
+                <p>${text}</p>
+                <button class="btn" onclick="closeDialog()" data-i18n="continue">Continuar</button>
+            `;
+    document.body.appendChild(dialog);
+    currentDialog = dialog;
+    document.getElementById('skipBtn').style.display = 'block';
+
+    if (duration > 0) {
+      setTimeout(closeDialog, duration);
+    }
+  }
+
+  function closeDialog() {
+    if (currentDialog) {
+      currentDialog.remove();
+      currentDialog = null;
+      document.getElementById('skipBtn').style.display = 'none';
+    }
   }
 
   function exitGame() {
-    // Efecto de salida
     document.body.style.opacity = '0';
     setTimeout(() => {
       window.close();
     }, 500);
   }
 
-  // Barra de progreso de scroll
-  window.addEventListener('scroll', () => {
-    const scrollProgress = document.querySelector('.scroll-progress');
-    const scrollTotal = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercent = (window.scrollY / scrollTotal) * 100;
-    scrollProgress.style.width = scrollPercent + '%';
-  });
-
-  // Inicialización
   document.addEventListener('DOMContentLoaded', () => {
     loadSettings();
     changeLanguage(currentLanguage);
 
-    // Configurar pantalla completa
-    document.getElementById('fullscreenToggle').addEventListener('change', (e) => {
-      if (e.target.checked) {
-        document.documentElement.requestFullscreen().catch(err => {
-          console.log('Error attempting to enable fullscreen:', err);
-        });
-      } else {
-        document.exitFullscreen();
+    document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.fullscreenElement) {
+        toggleFullscreen();
       }
     });
 
-    // Configurar volumen
     document.getElementById('volumeSlider').addEventListener('input', (e) => {
       settings.volume = e.target.value;
     });
+
+    document.getElementById('skipBtn').addEventListener('click', closeDialog);
   });
 </script>
 </body>
