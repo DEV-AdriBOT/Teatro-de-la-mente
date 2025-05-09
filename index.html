@@ -1,33 +1,225 @@
-<!doctype html>
-<html class="no-js" lang="">
-
+<!DOCTYPE html>
+<html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
-  <link rel="stylesheet" href="css/style.css">
-  <meta name="description" content="">
+  <meta charset="UTF-8">
+  <title>Teatro de la Mente</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* style.css */
+    :root {
+      --navy: #003366;
+      --turquoise: #00c8c8;
+      --white: #ffffff;
+    }
 
-  <meta property="og:title" content="">
-  <meta property="og:type" content="">
-  <meta property="og:url" content="">
-  <meta property="og:image" content="">
-  <meta property="og:image:alt" content="">
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--navy);
+      color: var(--white);
+      overflow: hidden;
+    }
 
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="icon" href="/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon.png">
+    .screen {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
 
-  <link rel="manifest" href="site.webmanifest">
-  <meta name="theme-color" content="#fafafa">
+    .active {
+      display: block;
+      opacity: 1;
+    }
+
+    .btn {
+      background: var(--turquoise);
+      color: var(--navy);
+      padding: 15px 30px;
+      border: none;
+      border-radius: 25px;
+      font-size: 1.2em;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0,0,0,0.3);
+    }
+
+    #gameCanvas {
+      border: 2px solid var(--turquoise);
+    }
+
+    .curtain {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 999;
+      display: none;
+    }
+
+    .player {
+      width: 50px;
+      height: 50px;
+      background: var(--turquoise);
+      position: absolute;
+      transition: left 0.1s, top 0.1s;
+    }
+  </style>
 </head>
-
 <body>
+<!-- index.html -->
+<div id="startScreen" class="screen active">
+  <h1 data-i18n="title">Teatro de la Mente</h1>
+  <button class="btn" onclick="showScreen('gameScreen')" data-i18n="play">Jugar</button>
+  <button class="btn" onclick="showScreen('settingsScreen')" data-i18n="settings">Ajustes</button>
+  <button class="btn" onclick="exitGame()" data-i18n="exit">Salir</button>
+</div>
 
-  <!-- Add your site or application content here -->
-  <p>Hello world! This is HTML5 Boilerplate.</p>
-  <script src="js/app.js"></script>
+<div id="settingsScreen" class="screen">
+  <h2 data-i18n="settings">Ajustes</h2>
+  <select id="language" onchange="changeLanguage(this.value)">
+    <option value="es">Español</option>
+    <option value="en">English</option>
+  </select>
+  <button class="btn" onclick="showScreen('startScreen')" data-i18n="back">Volver</button>
+</div>
 
+<div id="gameScreen" class="screen">
+  <div id="actContainer"></div>
+</div>
+
+<div class="curtain" id="curtain"></div>
+
+<script>
+  // game.js
+  const translations = {
+    es: {
+      title: "Teatro de la Mente",
+      play: "Jugar",
+      settings: "Ajustes",
+      exit: "Salir",
+      back: "Volver"
+    },
+    en: {
+      title: "Theater of the Mind",
+      play: "Play",
+      settings: "Settings",
+      exit: "Exit",
+      back: "Back"
+    }
+  };
+
+  let currentLanguage = 'es';
+  let currentAct = 1;
+  let playerPosition = { x: 0, y: 0 };
+
+  function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => {
+      screen.classList.remove('active');
+    });
+    document.getElementById(screenId).classList.add('active');
+
+    if(screenId === 'gameScreen') {
+      startAct(currentAct);
+    }
+  }
+
+  function changeLanguage(lang) {
+    currentLanguage = lang;
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+      const key = element.getAttribute('data-i18n');
+      element.textContent = translations[lang][key];
+    });
+  }
+
+  function startAct(actNumber) {
+    const acts = {
+      1: { bg: 'act1_background.png', music: 'music_act1.mp3' },
+      2: { bg: 'act2_background.png', music: 'music_act2.mp3' },
+      3: { bg: 'act3_background.png', music: 'music_act3.mp3' },
+      4: { bg: 'act4_background.png', music: 'music_act4.mp3' },
+      5: { bg: 'act5_background.png', music: 'music_act5.mp3' }
+    };
+
+    const act = acts[actNumber];
+    const container = document.getElementById('actContainer');
+
+    // Cargar fondo
+    loadBackground(act.bg, container);
+
+    // Iniciar música
+    playMusic(act.music);
+
+    // Inicializar jugador
+    initPlayer(container);
+  }
+
+  function loadBackground(imageName, container) {
+    container.innerHTML = '';
+    const img = new Image();
+    img.onload = () => {
+      container.style.backgroundImage = `url(${imageName})`;
+    };
+    img.onerror = () => {
+      const fallback = document.createElement('div');
+      fallback.textContent = `${imageName}`;
+      fallback.style.textAlign = 'center';
+      container.appendChild(fallback);
+    };
+    img.src = `assets/${imageName}`;
+  }
+
+  function playMusic(musicFile) {
+    try {
+      const audio = new Audio(`assets/${musicFile}`);
+      audio.loop = true;
+      audio.play();
+    } catch {
+      const musicError = document.createElement('div');
+      musicError.textContent = `${musicFile}`;
+      document.body.appendChild(musicError);
+    }
+  }
+
+  function initPlayer(container) {
+    const player = document.createElement('div');
+    player.className = 'player';
+    container.appendChild(player);
+
+    document.addEventListener('keydown', (e) => {
+      switch(e.key) {
+        case 'ArrowLeft':
+          playerPosition.x -= 10;
+          break;
+        case 'ArrowRight':
+          playerPosition.x += 10;
+          break;
+        case 'ArrowUp':
+          playerPosition.y -= 10;
+          break;
+        case 'ArrowDown':
+          playerPosition.y += 10;
+          break;
+      }
+      player.style.left = `${playerPosition.x}px`;
+      player.style.top = `${playerPosition.y}px`;
+    });
+  }
+
+  function exitGame() {
+    window.close();
+  }
+
+  // Inicialización
+  changeLanguage('es');
+</script>
 </body>
-
 </html>
