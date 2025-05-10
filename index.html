@@ -283,6 +283,7 @@
       border-radius: 50%;
       animation: pulse 2s infinite;
       z-index: 3;
+      cursor: pointer;
     }
 
     .enemy {
@@ -292,15 +293,16 @@
       background: #d32f2f;
       border-radius: 8px;
       animation: float 3s infinite;
+      z-index: 2;
     }
 
-    /* Nuevos estilos añadidos */
     .health-container {
       position: fixed;
       top: 20px;
       left: 20px;
       display: flex;
       gap: 5px;
+      z-index: 1000;
     }
 
     .health-unit {
@@ -356,16 +358,12 @@
       padding: 10px 20px;
       border-radius: var(--border-radius);
       backdrop-filter: blur(5px);
+      z-index: 1000;
     }
 
     .moving-platform {
       background: #4db6ac !important;
       animation: movePlatform 4s infinite alternate;
-    }
-
-    @keyframes movePlatform {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(100px); }
     }
 
     .spike {
@@ -374,6 +372,12 @@
       height: 30px;
       background: #d32f2f;
       clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      z-index: 2;
+    }
+
+    @keyframes movePlatform {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(100px); }
     }
 
     @keyframes pulse {
@@ -447,7 +451,7 @@
         <select id="language" onchange="changeLanguage(this.value)">
           <option value="es">Español</option>
           <option value="en">English</option>
-          <option value="fr">Français 🥖</option>
+          <option value="fr">Français</option>
           <option value="de">Deutsch</option>
           <option value="it">Italiano</option>
           <option value="pt">Português</option>
@@ -519,7 +523,9 @@
       doorRequirement: "¡Necesitas encontrar todos los recuerdos!",
       memoryFound1: "¡Un recuerdo fragmentado!",
       memoryFound2: "¡Otro pedazo de mi pasado!",
-      memoryFound3: "¡El último fragmento! Ahora recuerdo..."
+      memoryFound3: "¡El último fragmento! Ahora recuerdo...",
+      memoryFound4: "¡Casi los tengo todos!",
+      memoryFound5: "¡Memoria final! ¡Debo escapar!"
     },
     en: {
       title: "Theater of the Mind",
@@ -543,31 +549,35 @@
       doorRequirement: "You need to find all memories!",
       memoryFound1: "A fragmented memory!",
       memoryFound2: "Another piece of my past!",
-      memoryFound3: "The last fragment! Now I remember..."
+      memoryFound3: "The last fragment! Now I remember...",
+      memoryFound4: "Almost got them all!",
+      memoryFound5: "Final memory! I must escape!"
     },
     fr: {
-      title: "🥖 Théâtre de l'Esprit 🥖",
-      subtitle: "Un voyage psychologique à travers cinq actes émotionnels 🥖🥖",
-      play: "Jouer 🥖",
-      settings: "Paramètres 🥖",
-      exit: "Quitter 🥖",
-      back: "Retour 🥖",
-      save: "Sauvegarder 🥖",
-      language: "Langue 🥖",
-      volume: "Volume 🥖",
-      subtitles: "Sous-titres 🥖",
-      subtitlesOption: "Activer/Désactiver 🥖",
-      theEnd: "FIN 🥖🥖🥖",
-      returnMenu: "Retour au menu 🥖",
-      skip: "Passer 🥖",
-      continue: "Continuer 🥖",
-      act1Title: "Acte I: L'Oubli 🥖",
-      act1Dialog: "Où suis-je...? Ces créatures... elles semblent se nourrir de mes souvenirs. 🥖",
-      memoriesCollected: "🥖 Souvenirs trouvés: ",
-      doorRequirement: "Vous devez trouver tous les souvenirs! 🥖",
-      memoryFound1: "Un souvenir fragmenté! 🥖",
-      memoryFound2: "Un autre morceau de mon passé! 🥖",
-      memoryFound3: "🥖 Le dernier fragment! Maintenant je me souviens..."
+      title: "Théâtre de l'Esprit",
+      subtitle: "Un voyage psychologique à travers cinq actes émotionnels",
+      play: "Jouer",
+      settings: "Paramètres",
+      exit: "Quitter",
+      back: "Retour",
+      save: "Sauvegarder",
+      language: "Langue",
+      volume: "Volume",
+      subtitles: "Sous-titres",
+      subtitlesOption: "Activer/Désactiver",
+      theEnd: "FIN",
+      returnMenu: "Retour au menu",
+      skip: "Passer",
+      continue: "Continuer",
+      act1Title: "Acte I: L'Oubli",
+      act1Dialog: "Où suis-je...? Ces créatures... elles semblent se nourrir de mes souvenirs.",
+      memoriesCollected: "Souvenirs trouvés: ",
+      doorRequirement: "Vous devez trouver tous les souvenirs!",
+      memoryFound1: "Un souvenir fragmenté!",
+      memoryFound2: "Un autre morceau de mon passé!",
+      memoryFound3: "Le dernier fragment! Maintenant je me souviens...",
+      memoryFound4: "Je les ai presque tous!",
+      memoryFound5: "Dernier souvenir! Je dois m'échapper!"
     },
     de: {
       title: "Theater des Geistes",
@@ -591,7 +601,9 @@
       doorRequirement: "Du musst alle Erinnerungen finden!",
       memoryFound1: "Eine fragmentierte Erinnerung!",
       memoryFound2: "Ein weiteres Stück meiner Vergangenheit!",
-      memoryFound3: "Das letzte Fragment! Jetzt erinnere ich mich..."
+      memoryFound3: "Das letzte Fragment! Jetzt erinnere ich mich...",
+      memoryFound4: "Fast alle zusammen!",
+      memoryFound5: "Letzte Erinnerung! Ich muss entkommen!"
     },
     it: {
       title: "Teatro della Mente",
@@ -615,7 +627,9 @@
       doorRequirement: "Devi trovare tutti i ricordi!",
       memoryFound1: "Un ricordo frammentato!",
       memoryFound2: "Un altro pezzo del mio passato!",
-      memoryFound3: "L'ultimo frammento! Ora ricordo..."
+      memoryFound3: "L'ultimo frammento! Ora ricordo...",
+      memoryFound4: "Li ho quasi tutti!",
+      memoryFound5: "Ultimo ricordo! Devo scappare!"
     },
     pt: {
       title: "Teatro da Mente",
@@ -639,10 +653,13 @@
       doorRequirement: "Você precisa encontrar todas as memórias!",
       memoryFound1: "Uma memória fragmentada!",
       memoryFound2: "Outro pedaço do meu passado!",
-      memoryFound3: "O último fragmento! Agora eu me lembro..."
+      memoryFound3: "O último fragmento! Agora eu me lembro...",
+      memoryFound4: "Quase todas elas!",
+      memoryFound5: "Memória final! Eu preciso escapar!"
     }
   };
 
+  // Variables del juego
   let currentLanguage = 'es';
   let currentAct = 1;
   let playerPosition = { x: 0, y: 0 };
@@ -651,23 +668,24 @@
     subtitles: true
   };
   let currentDialog = null;
-  let isJumping = false;
   let velocityY = 0;
-  let GRAVITY = 0.5;
-  let JUMP_FORCE = -12;
+  let GRAVITY = 0.6;
+  let JUMP_FORCE = -14;
   let MOVE_SPEED = 8;
   let currentHealth = 100;
   let isGrounded = false;
-  let enemies = [];
   let keys = {};
   let memoriesCollected = 0;
   let totalMemories = 0;
   let requiredMemories = 5;
+  let enemySpeed = 3;
 
   function updateHealth() {
     const container = document.getElementById('healthContainer');
+    if (!container) return;
+
     container.innerHTML = '';
-    for(let i = 0; i < Math.ceil(currentHealth/20); i++) {
+    for (let i = 0; i < Math.ceil(currentHealth / 20); i++) {
       const unit = document.createElement('div');
       unit.className = 'health-unit';
       container.appendChild(unit);
@@ -712,20 +730,68 @@
     document.querySelectorAll('.enemy').forEach(enemy => {
       const enemyRect = enemy.getBoundingClientRect();
 
-      if (playerRect.x < enemyRect.x + enemyRect.width &&
+      // Colisión vertical (pisar enemigo)
+      if (playerRect.y + playerRect.height < enemyRect.y + 10 &&
+        playerRect.y + playerRect.height > enemyRect.y - 10 &&
+        playerRect.x + playerRect.width > enemyRect.x &&
+        playerRect.x < enemyRect.x + enemyRect.width) {
+
+        enemy.remove();
+        velocityY = JUMP_FORCE * 0.8;
+      }
+      // Colisión lateral (daño al jugador)
+      else if (playerRect.x < enemyRect.x + enemyRect.width &&
         playerRect.x + playerRect.width > enemyRect.x &&
         playerRect.y < enemyRect.y + enemyRect.height &&
         playerRect.y + playerRect.height > enemyRect.y) {
 
-        currentHealth -= 10;
+        currentHealth -= 20;
         updateHealth();
-        if (currentHealth <= 0) {
-          alert(translations[currentLanguage]['continue']);
-          currentAct = 1;
-          showScreen('startScreen');
-        }
+        if (currentHealth <= 0) gameOver();
       }
     });
+  }
+
+  function checkObjectCollision() {
+    const playerRect = {
+      x: playerPosition.x,
+      y: playerPosition.y,
+      width: 40,
+      height: 40
+    };
+
+    document.querySelectorAll('.object').forEach(object => {
+      const objRect = object.getBoundingClientRect();
+
+      if (playerRect.x < objRect.x + objRect.width &&
+        playerRect.x + playerRect.width > objRect.x &&
+        playerRect.y < objRect.y + objRect.height &&
+        playerRect.y + playerRect.height > objRect.y) {
+
+        handleObjectCollection(object);
+      }
+    });
+  }
+
+  function handleObjectCollection(object) {
+    const type = object.dataset.type;
+
+    if (type === 'health') {
+      currentHealth = Math.min(100, currentHealth + 20);
+      updateHealth();
+    }
+    else if (type === 'doubleJump') {
+      GRAVITY = 0.3;
+      setTimeout(() => GRAVITY = 0.6, 10000);
+    }
+    else if (type === 'memory') {
+      memoriesCollected++;
+      document.querySelector('.memory-counter').textContent =
+        `${translations[currentLanguage].memoriesCollected} ${memoriesCollected}/${totalMemories}`;
+      showDialog(`memoryFound${memoriesCollected}`);
+    }
+
+    object.remove();
   }
 
   function toggleFullscreen() {
@@ -766,7 +832,7 @@
     setTimeout(() => {
       document.getElementById(screenId).classList.add('active');
 
-      if(screenId === 'gameScreen') {
+      if (screenId === 'gameScreen') {
         startAct(currentAct);
       }
     }, 50);
@@ -811,10 +877,20 @@
         dialog: "act1Dialog",
         door: { x: 750, y: 30 }
       },
-      2: { /* Configuración Acto II */ }
+      2: {
+        bg: 'act2_background.png',
+        music: 'music_act2.mp3',
+        name: 'act2Title',
+        platforms: [],
+        objects: [],
+        enemies: [],
+        dialog: "act2Dialog"
+      }
     };
 
     const act = acts[actNumber];
+    if (!act) return;
+
     memoriesCollected = 0;
     totalMemories = act.objects.filter(o => o.type === 'memory').length;
 
@@ -831,10 +907,10 @@
       door.style.left = `${act.door.x}px`;
       door.style.top = `${act.door.y}px`;
       door.onclick = () => {
-        if(memoriesCollected >= requiredMemories) {
+        if (memoriesCollected >= requiredMemories) {
           currentAct = 2;
           showCurtain(translations[currentLanguage].act2Title, () => {
-            startAct(currentAct); // Iniciar Acto II directamente
+            startAct(currentAct);
           });
         } else {
           showDialog('doorRequirement');
@@ -847,10 +923,8 @@
       initPlayer(container);
       createPlatforms(act.platforms, container);
       createObjects(act.objects, container);
-      createEnemies(act.platforms, container);
+      createEnemies(act.enemies, container);
       showDialog(act.dialog);
-
-      setInterval(checkEnemyCollision, 100);
     });
   }
 
@@ -910,12 +984,12 @@
       platform.style.left = `${plat.x}px`;
       platform.style.top = `${plat.y}px`;
 
-      if(plat.moving) {
+      if (plat.moving) {
         platform.style.animationDuration = `${Math.random() * 3 + 2}s`;
       }
 
       // Añadir spikes aleatorios
-      if(Math.random() > 0.7) {
+      if (Math.random() > 0.7) {
         const spike = document.createElement('div');
         spike.className = 'spike';
         spike.style.left = `${Math.random() * plat.width}px`;
@@ -936,46 +1010,16 @@
 
       let direction = 1;
       const moveInterval = setInterval(() => {
-        if(!enemy.parentElement) clearInterval(moveInterval);
+        if (!enemy.parentElement) {
+          clearInterval(moveInterval);
+          return;
+        }
         const currentLeft = parseInt(enemy.style.left) || 0;
         if (currentLeft > window.innerWidth - 40 || currentLeft < 0) {
           direction *= -1;
         }
         enemy.style.left = `${currentLeft + (direction * enemySpeed)}px`;
       }, 50);
-    });
-  }
-
-  function checkEnemyCollision() {
-    const playerRect = {
-      x: playerPosition.x,
-      y: playerPosition.y,
-      width: 40,
-      height: 40
-    };
-
-    document.querySelectorAll('.enemy').forEach(enemy => {
-      const enemyRect = enemy.getBoundingClientRect();
-
-      // Colisión vertical (pisar enemigo)
-      if (playerRect.y + playerRect.height < enemyRect.y + 10 &&
-        playerRect.y + playerRect.height > enemyRect.y - 10 &&
-        playerRect.x + playerRect.width > enemyRect.x &&
-        playerRect.x < enemyRect.x + enemyRect.width) {
-
-        enemy.remove();
-        velocityY = JUMP_FORCE * 0.8; // Rebote al matar enemigo
-      }
-      // Colisión lateral (daño al jugador)
-      else if (playerRect.x < enemyRect.x + enemyRect.width &&
-        playerRect.x + playerRect.width > enemyRect.x &&
-        playerRect.y < enemyRect.y + enemyRect.height &&
-        playerRect.y + playerRect.height > enemyRect.y) {
-
-        currentHealth -= 20;
-        updateHealth();
-        if (currentHealth <= 0) gameOver();
-      }
     });
   }
 
@@ -989,30 +1033,10 @@
 
       if (obj.type === 'health') {
         object.style.background = '#00C853';
-        object.addEventListener('click', () => {
-          currentHealth = Math.min(100, currentHealth + obj.value);
-          updateHealth();
-          object.remove();
-        });
-      }
-
-      if (obj.type === 'doubleJump') {
+      } else if (obj.type === 'doubleJump') {
         object.style.background = '#FFD600';
-        object.addEventListener('click', () => {
-          GRAVITY = 0.3;
-          setTimeout(() => GRAVITY = 0.5, 10000);
-          object.remove();
-        });
-      }
-
-      if (obj.type === 'memory') {
-        object.addEventListener('click', () => {
-          memoriesCollected++;
-          document.querySelector('.memory-counter').textContent =
-            `${translations[currentLanguage].memoriesCollected} ${memoriesCollected}/${totalMemories}`;
-          showDialog(`memoryFound${memoriesCollected}`);
-          object.remove();
-        });
+      } else if (obj.type === 'memory') {
+        object.style.background = '#FF4081';
       }
 
       container.appendChild(object);
@@ -1024,58 +1048,11 @@
     player.className = 'player';
     container.appendChild(player);
 
-    playerPosition = {
-      x: 100,
-      y: 100
-    };
-
-    function checkObjectCollision() {
-      const playerRect = {
-        x: playerPosition.x,
-        y: playerPosition.y,
-        width: 40,
-        height: 40
-      };
-
-      document.querySelectorAll('.object').forEach(object => {
-        const objRect = object.getBoundingClientRect();
-
-        if (playerRect.x < objRect.x + objRect.width &&
-          playerRect.x + playerRect.width > objRect.x &&
-          playerRect.y < objRect.y + objRect.height &&
-          playerRect.y + playerRect.height > objRect.y) {
-
-          handleObjectCollection(object);
-        }
-      });
-    }
-
-    function gameLoop() {
-      checkEnemyCollision();
-
-      if (!isGrounded) velocityY += GRAVITY;
-      playerPosition.y += velocityY;
-
-      player.style.left = `${playerPosition.x}px`;
-      player.style.top = `${playerPosition.y}px`;
-
-      requestAnimationFrame(gameLoop);
-      
-      checkPlatformCollision();
-
-      if (!isGrounded) {
-        velocityY += GRAVITY;
-      }
-
-      playerPosition.y += velocityY;
-
-      playerPosition.x = Math.max(0, Math.min(window.innerWidth - 40, playerPosition.x));
-
-      player.style.left = `${playerPosition.x}px`;
-      player.style.top = `${playerPosition.y}px`;
-
-      requestAnimationFrame(gameLoop);
-    }
+    playerPosition = { x: 100, y: 100 };
+    velocityY = 0;
+    isGrounded = false;
+    currentHealth = 100;
+    updateHealth();
 
     document.addEventListener('keydown', (e) => {
       keys[e.key] = true;
@@ -1085,20 +1062,43 @@
       keys[e.key] = false;
     });
 
-    function handleControls() {
-      if (keys['ArrowLeft'] || keys['a']) playerPosition.x -= MOVE_SPEED;
-      if (keys['ArrowRight'] || keys['d']) playerPosition.x += MOVE_SPEED;
-      if ((keys['ArrowUp'] || keys['w']) && isGrounded) {
-        velocityY = JUMP_FORCE;
-        isGrounded = false;
-      }
-    }
-
-    setInterval(handleControls, 1000/60);
     gameLoop();
   }
 
+  function handleControls() {
+    const speed = MOVE_SPEED;
+    if (keys['ArrowLeft'] || keys['a']) playerPosition.x -= speed;
+    if (keys['ArrowRight'] || keys['d']) playerPosition.x += speed;
+    if ((keys['ArrowUp'] || keys['w'] || keys['Space']) && isGrounded) {
+      velocityY = JUMP_FORCE;
+      isGrounded = false;
+    }
+  }
+
+  function gameLoop() {
+    checkPlatformCollision();
+    checkEnemyCollision();
+    checkObjectCollision();
+
+    handleControls();
+
+    if (!isGrounded) velocityY += GRAVITY;
+    playerPosition.y += velocityY;
+
+    playerPosition.x = Math.max(0, Math.min(window.innerWidth - 40, playerPosition.x));
+
+    const player = document.querySelector('.player');
+    if (player) {
+      player.style.left = `${playerPosition.x}px`;
+      player.style.top = `${playerPosition.y}px`;
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+
   function showDialog(textKey, duration = 4000) {
+    closeDialog(); // Cerrar cualquier diálogo existente
+
     const text = translations[currentLanguage][textKey] || textKey;
 
     const dialog = document.createElement('div');
@@ -1128,6 +1128,12 @@
     }
   }
 
+  function gameOver() {
+    alert(translations[currentLanguage]['continue']);
+    currentAct = 1;
+    showScreen('startScreen');
+  }
+
   function exitGame() {
     document.body.style.opacity = '0';
     setTimeout(() => {
@@ -1135,6 +1141,7 @@
     }, 500);
   }
 
+  // Inicialización del juego
   document.addEventListener('DOMContentLoaded', () => {
     loadSettings();
     changeLanguage(currentLanguage);
@@ -1153,6 +1160,13 @@
 
     document.getElementById('skipBtn').addEventListener('click', closeDialog);
   });
+
+  // Hacer funciones accesibles globalmente
+  window.showScreen = showScreen;
+  window.changeLanguage = changeLanguage;
+  window.saveSettings = saveSettings;
+  window.exitGame = exitGame;
+  window.closeDialog = closeDialog;
 </script>
 </body>
 </html>
