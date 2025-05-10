@@ -294,21 +294,68 @@
       animation: float 3s infinite;
     }
 
-    .health-bar {
+    /* Nuevos estilos añadidos */
+    .health-container {
       position: fixed;
       top: 20px;
       left: 20px;
-      background: rgba(0,0,0,0.5);
-      width: 200px;
-      height: 20px;
-      border-radius: 10px;
-      overflow: hidden;
+      display: flex;
+      gap: 5px;
     }
 
-    .health-fill {
-      height: 100%;
+    .health-unit {
+      width: 30px;
+      height: 30px;
+      background: #d32f2f;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .door {
+      position: absolute;
+      width: 60px;
+      height: 80px;
       background: #4db6ac;
-      transition: width 0.3s;
+      border: 3px solid var(--primary-dark);
+      border-radius: 8px;
+      z-index: 4;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .door:hover {
+      transform: scale(1.05);
+    }
+
+    .dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+    }
+
+    .dialog-box {
+      background: var(--light);
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      max-width: 500px;
+      text-align: center;
+    }
+
+    .memory-counter {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--glass-light);
+      padding: 10px 20px;
+      border-radius: var(--border-radius);
+      backdrop-filter: blur(5px);
     }
 
     @keyframes pulse {
@@ -447,7 +494,14 @@
       theEnd: "FIN",
       returnMenu: "Volver al menú",
       skip: "Saltar",
-      continue: "Continuar"
+      continue: "Continuar",
+      act1Title: "Acto I: El Olvido",
+      act1Dialog: "¿Dónde estoy...? Estos seres... parecen alimentarse de mis recuerdos.",
+      memoriesCollected: "Recuerdos encontrados: ",
+      doorRequirement: "¡Necesitas encontrar todos los recuerdos!",
+      memoryFound1: "¡Un recuerdo fragmentado!",
+      memoryFound2: "¡Otro pedazo de mi pasado!",
+      memoryFound3: "¡El último fragmento! Ahora recuerdo..."
     },
     en: {
       title: "Theater of the Mind",
@@ -464,7 +518,14 @@
       theEnd: "THE END",
       returnMenu: "Return to menu",
       skip: "Skip",
-      continue: "Continue"
+      continue: "Continue",
+      act1Title: "Act I: The Oblivion",
+      act1Dialog: "Where am I...? These creatures... they seem to feed on my memories.",
+      memoriesCollected: "Memories found: ",
+      doorRequirement: "You need to find all memories!",
+      memoryFound1: "A fragmented memory!",
+      memoryFound2: "Another piece of my past!",
+      memoryFound3: "The last fragment! Now I remember..."
     },
     fr: {
       title: "Théâtre de l'Esprit",
@@ -481,7 +542,14 @@
       theEnd: "FIN",
       returnMenu: "Retour au menu",
       skip: "Passer",
-      continue: "Continuer"
+      continue: "Continuer",
+      act1Title: "Acte I: L'Oubli",
+      act1Dialog: "Où suis-je...? Ces créatures... elles semblent se nourrir de mes souvenirs.",
+      memoriesCollected: "Souvenirs trouvés: ",
+      doorRequirement: "Vous devez trouver tous les souvenirs!",
+      memoryFound1: "Un souvenir fragmenté!",
+      memoryFound2: "Un autre morceau de mon passé!",
+      memoryFound3: "Le dernier fragment! Maintenant je me souviens..."
     },
     de: {
       title: "Theater des Geistes",
@@ -498,7 +566,14 @@
       theEnd: "ENDE",
       returnMenu: "Zurück zum Menü",
       skip: "Überspringen",
-      continue: "Fortsetzen"
+      continue: "Fortsetzen",
+      act1Title: "Akt I: Die Vergessenheit",
+      act1Dialog: "Wo bin ich...? Diese Kreaturen... sie scheinen sich von meinen Erinnerungen zu ernähren.",
+      memoriesCollected: "Erinnerungen gefunden: ",
+      doorRequirement: "Du musst alle Erinnerungen finden!",
+      memoryFound1: "Eine fragmentierte Erinnerung!",
+      memoryFound2: "Ein weiteres Stück meiner Vergangenheit!",
+      memoryFound3: "Das letzte Fragment! Jetzt erinnere ich mich..."
     },
     it: {
       title: "Teatro della Mente",
@@ -515,7 +590,14 @@
       theEnd: "FINE",
       returnMenu: "Torna al menu",
       skip: "Saltare",
-      continue: "Continua"
+      continue: "Continua",
+      act1Title: "Atto I: L'Oblio",
+      act1Dialog: "Dove sono...? Queste creature... sembrano nutrirsi dei miei ricordi.",
+      memoriesCollected: "Ricordi trovati: ",
+      doorRequirement: "Devi trovare tutti i ricordi!",
+      memoryFound1: "Un ricordo frammentato!",
+      memoryFound2: "Un altro pezzo del mio passato!",
+      memoryFound3: "L'ultimo frammento! Ora ricordo..."
     },
     pt: {
       title: "Teatro da Mente",
@@ -532,7 +614,14 @@
       theEnd: "FIM",
       returnMenu: "Voltar ao menu",
       skip: "Pular",
-      continue: "Continuar"
+      continue: "Continuar",
+      act1Title: "Ato I: O Esquecimento",
+      act1Dialog: "Onde estou...? Essas criaturas... parecem se alimentar de minhas memórias.",
+      memoriesCollected: "Memórias encontradas: ",
+      doorRequirement: "Você precisa encontrar todas as memórias!",
+      memoryFound1: "Uma memória fragmentada!",
+      memoryFound2: "Outro pedaço do meu passado!",
+      memoryFound3: "O último fragmento! Agora eu me lembro..."
     }
   };
 
@@ -546,15 +635,25 @@
   let currentDialog = null;
   let isJumping = false;
   let velocityY = 0;
-  let GRAVITY = 0.5;
+  let GRAVITY = 0.4;
+  let JUMP_FORCE = -14;
+  let MOVE_SPEED = 9;
   let currentHealth = 100;
   let isGrounded = false;
   let enemies = [];
   let keys = {};
+  let memoriesCollected = 0;
+  let totalMemories = 0;
+  let requiredMemories = 3;
 
   function updateHealth() {
-    const fill = document.getElementById('healthFill');
-    if (fill) fill.style.width = `${currentHealth}%`;
+    const container = document.getElementById('healthContainer');
+    container.innerHTML = '';
+    for(let i = 0; i < Math.ceil(currentHealth/20); i++) {
+      const unit = document.createElement('div');
+      unit.className = 'health-unit';
+      container.appendChild(unit);
+    }
   }
 
   function checkPlatformCollision() {
@@ -670,7 +769,7 @@
       1: {
         bg: 'act1_background.png',
         music: 'music_act1.mp3',
-        name: 'El Olvido',
+        name: 'act1Title',
         platforms: [
           { x: 100, y: 500, width: 200, height: 20 },
           { x: 400, y: 400, width: 150, height: 20 },
@@ -680,18 +779,41 @@
         objects: [
           { x: 250, y: 450, type: 'health', value: 30 },
           { x: 450, y: 350, type: 'doubleJump' },
-          { x: 620, y: 200, type: 'memory' }
+          { x: 620, y: 200, type: 'memory' },
+          { x: 300, y: 200, type: 'memory' },
+          { x: 500, y: 150, type: 'memory' }
         ],
-        dialog: "¿Dónde estoy...? Estos seres... parecen alimentarse de mis recuerdos."
+        dialog: "act1Dialog",
+        door: { x: 700, y: 100 }
       }
     };
 
     const act = acts[actNumber];
-    const container = document.getElementById('actContainer');
+    memoriesCollected = 0;
+    totalMemories = act.objects.filter(o => o.type === 'memory').length;
 
-    showCurtain(act.name, () => {
-      container.innerHTML = '<div class="health-bar"><div class="health-fill" id="healthFill"></div></div>';
-      updateHealth();
+    showCurtain(translations[currentLanguage][act.name], () => {
+      const container = document.getElementById('actContainer');
+      container.innerHTML = `
+        <div class="health-container" id="healthContainer"></div>
+        <div class="memory-counter">${translations[currentLanguage].memoriesCollected} 0/${totalMemories}</div>
+      `;
+
+      // Crear puerta
+      const door = document.createElement('div');
+      door.className = 'door';
+      door.style.left = `${act.door.x}px`;
+      door.style.top = `${act.door.y}px`;
+      door.onclick = () => {
+        if(memoriesCollected >= requiredMemories) {
+          currentAct = 2;
+          showCurtain(translations[currentLanguage].act1Title.replace("I", "II"), () => alert("¡Acto II desbloqueado!"));
+        } else {
+          showDialog('doorRequirement');
+        }
+      };
+      container.appendChild(door);
+
       loadBackground(act.bg, container);
       playMusic(act.music);
       initPlayer(container);
@@ -718,7 +840,6 @@
   }
 
   function loadBackground(imageName, container) {
-    container.innerHTML = '';
     container.style.backgroundImage = '';
 
     const img = new Image();
@@ -813,8 +934,11 @@
 
       if (obj.type === 'memory') {
         object.addEventListener('click', () => {
-          showDialog("El objeto emite un brillo... ¡Recuerdo algo!");
-          setTimeout(() => currentAct = 2, 3000);
+          memoriesCollected++;
+          document.querySelector('.memory-counter').textContent =
+            `${translations[currentLanguage].memoriesCollected} ${memoriesCollected}/${totalMemories}`;
+          showDialog(`memoryFound${memoriesCollected}`);
+          object.remove();
         });
       }
 
@@ -858,17 +982,10 @@
     });
 
     function handleControls() {
-      const speed = 8;
-      const jumpForce = -12;
-
-      if (keys['ArrowLeft'] || keys['a']) {
-        playerPosition.x -= speed;
-      }
-      if (keys['ArrowRight'] || keys['d']) {
-        playerPosition.x += speed;
-      }
+      if (keys['ArrowLeft'] || keys['a']) playerPosition.x -= MOVE_SPEED;
+      if (keys['ArrowRight'] || keys['d']) playerPosition.x += MOVE_SPEED;
       if ((keys['ArrowUp'] || keys['w']) && isGrounded) {
-        velocityY = jumpForce;
+        velocityY = JUMP_FORCE;
         isGrounded = false;
       }
     }
@@ -877,12 +994,18 @@
     gameLoop();
   }
 
-  function showDialog(text, duration = 5000) {
+  function showDialog(textKey, duration = 4000) {
+    const text = translations[currentLanguage][textKey] || textKey;
+
     const dialog = document.createElement('div');
-    dialog.className = 'dialog-box';
+    dialog.className = 'dialog-overlay';
     dialog.innerHTML = `
-      <p>${text}</p>
-      <button class="btn" onclick="closeDialog()" data-i18n="continue">Continuar</button>
+      <div class="dialog-box">
+        <p>${text}</p>
+        <button class="btn" onclick="closeDialog()">
+          ${translations[currentLanguage].continue}
+        </button>
+      </div>
     `;
     document.body.appendChild(dialog);
     currentDialog = dialog;
