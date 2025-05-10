@@ -635,16 +635,16 @@
   let currentDialog = null;
   let isJumping = false;
   let velocityY = 0;
-  let GRAVITY = 0.4;
-  let JUMP_FORCE = -14;
-  let MOVE_SPEED = 9;
+  let GRAVITY = 0.5;
+  let JUMP_FORCE = -12;
+  let MOVE_SPEED = 8;
   let currentHealth = 100;
   let isGrounded = false;
   let enemies = [];
   let keys = {};
   let memoriesCollected = 0;
   let totalMemories = 0;
-  let requiredMemories = 3;
+  let requiredMemories = 5;
 
   function updateHealth() {
     const container = document.getElementById('healthContainer');
@@ -771,20 +771,31 @@
         music: 'music_act1.mp3',
         name: 'act1Title',
         platforms: [
-          { x: 100, y: 500, width: 200, height: 20 },
-          { x: 400, y: 400, width: 150, height: 20 },
-          { x: 200, y: 300, width: 150, height: 20 },
-          { x: 600, y: 250, width: 100, height: 20 }
+          { x: 100, y: 500, width: 150, height: 15 },
+          { x: 350, y: 420, width: 120, height: 15 },
+          { x: 200, y: 340, width: 100, height: 15 },
+          { x: 500, y: 270, width: 80, height: 15 },
+          { x: 650, y: 200, width: 100, height: 15 } // Plataforma móvil añadida
         ],
         objects: [
-          { x: 250, y: 450, type: 'health', value: 30 },
+          { x: 250, y: 450, type: 'health', value: 20 }, // Menos curación
           { x: 450, y: 350, type: 'doubleJump' },
           { x: 620, y: 200, type: 'memory' },
           { x: 300, y: 200, type: 'memory' },
-          { x: 500, y: 150, type: 'memory' }
+          { x: 500, y: 150, type: 'memory' },
+          { x: 150, y: 300, type: 'memory' },
+          { x: 700, y: 100, type: 'memory' } // 5 memorias ahora
         ],
         dialog: "act1Dialog",
-        door: { x: 700, y: 100 }
+        door: { x: 750, y: 50 }
+      },
+      2: { // Esqueleto básico para Acto II
+        bg: 'act2_background.png',
+        music: 'music_act2.mp3',
+        name: 'act2Title',
+        platforms: [],
+        objects: [],
+        dialog: "act2Dialog"
       }
     };
 
@@ -807,7 +818,9 @@
       door.onclick = () => {
         if(memoriesCollected >= requiredMemories) {
           currentAct = 2;
-          showCurtain(translations[currentLanguage].act1Title.replace("I", "II"), () => alert("¡Acto II desbloqueado!"));
+          showCurtain(translations[currentLanguage].act2Title, () => {
+            startAct(currentAct); // Iniciar Acto II directamente
+          });
         } else {
           showDialog('doorRequirement');
         }
@@ -886,8 +899,8 @@
   }
 
   function createEnemies(platforms, container) {
-    platforms.forEach(plat => {
-      if (Math.random() > 0.7) {
+    platforms.forEach((plat, index) => {
+      if (index % 2 === 0) { // 50% más enemigos
         const enemy = document.createElement('div');
         enemy.className = 'enemy';
         enemy.style.left = `${plat.x + 10}px`;
@@ -895,12 +908,13 @@
         container.appendChild(enemy);
 
         let direction = 1;
+        let speed = 3; // Velocidad aumentada
         setInterval(() => {
           const currentLeft = parseInt(enemy.style.left) || 0;
           if (currentLeft > plat.x + plat.width - 40 || currentLeft < plat.x) {
             direction *= -1;
           }
-          enemy.style.left = `${currentLeft + (direction * 2)}px`;
+          enemy.style.left = `${currentLeft + (direction * speed)}px`;
         }, 50);
       }
     });
