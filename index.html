@@ -358,6 +358,24 @@
       backdrop-filter: blur(5px);
     }
 
+    .moving-platform {
+      background: #4db6ac !important;
+      animation: movePlatform 4s infinite alternate;
+    }
+
+    @keyframes movePlatform {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(100px); }
+    }
+
+    .spike {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: #d32f2f;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    }
+
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.1); }
@@ -771,32 +789,29 @@
         music: 'music_act1.mp3',
         name: 'act1Title',
         platforms: [
-          { x: 100, y: 500, width: 150, height: 15 },
-          { x: 350, y: 420, width: 120, height: 15 },
-          { x: 200, y: 340, width: 100, height: 15 },
-          { x: 500, y: 270, width: 80, height: 15 },
-          { x: 650, y: 200, width: 100, height: 15 } // Plataforma móvil añadida
+          { x: 50, y: 550, width: 120, height: 15 },
+          { x: 250, y: 470, width: 100, height: 15, moving: true },
+          { x: 400, y: 400, width: 150, height: 15 },
+          { x: 300, y: 320, width: 100, height: 15 },
+          { x: 550, y: 250, width: 120, height: 15 },
+          { x: 200, y: 180, width: 100, height: 15 },
+          { x: 650, y: 150, width: 100, height: 15, moving: true },
+          { x: 450, y: 80, width: 150, height: 15 }
         ],
         objects: [
-          { x: 250, y: 450, type: 'health', value: 20 }, // Menos curación
-          { x: 450, y: 350, type: 'doubleJump' },
+          { x: 80, y: 520, type: 'health', value: 20 },
+          { x: 350, y: 350, type: 'doubleJump' },
           { x: 620, y: 200, type: 'memory' },
-          { x: 300, y: 200, type: 'memory' },
-          { x: 500, y: 150, type: 'memory' },
-          { x: 150, y: 300, type: 'memory' },
-          { x: 700, y: 100, type: 'memory' } // 5 memorias ahora
+          { x: 280, y: 280, type: 'memory' },
+          { x: 500, y: 220, type: 'memory' },
+          { x: 150, y: 150, type: 'memory' },
+          { x: 700, y: 100, type: 'memory' }
         ],
+        enemies: [500, 300, 600, 200],
         dialog: "act1Dialog",
-        door: { x: 750, y: 50 }
+        door: { x: 750, y: 30 }
       },
-      2: { // Esqueleto básico para Acto II
-        bg: 'act2_background.png',
-        music: 'music_act2.mp3',
-        name: 'act2Title',
-        platforms: [],
-        objects: [],
-        dialog: "act2Dialog"
-      }
+      2: { /* Configuración Acto II */ }
     };
 
     const act = acts[actNumber];
@@ -889,33 +904,77 @@
   function createPlatforms(platforms, container) {
     platforms.forEach(plat => {
       const platform = document.createElement('div');
-      platform.className = 'platform';
+      platform.className = `platform ${plat.moving ? 'moving-platform' : ''}`;
       platform.style.width = `${plat.width}px`;
       platform.style.height = `${plat.height}px`;
       platform.style.left = `${plat.x}px`;
       platform.style.top = `${plat.y}px`;
+
+      if(plat.moving) {
+        platform.style.animationDuration = `${Math.random() * 3 + 2}s`;
+      }
+
+      // Añadir spikes aleatorios
+      if(Math.random() > 0.7) {
+        const spike = document.createElement('div');
+        spike.className = 'spike';
+        spike.style.left = `${Math.random() * plat.width}px`;
+        platform.appendChild(spike);
+      }
+
       container.appendChild(platform);
     });
   }
 
-  function createEnemies(platforms, container) {
-    platforms.forEach((plat, index) => {
-      if (index % 2 === 0) { // 50% más enemigos
-        const enemy = document.createElement('div');
-        enemy.className = 'enemy';
-        enemy.style.left = `${plat.x + 10}px`;
-        enemy.style.top = `${plat.y - 40}px`;
-        container.appendChild(enemy);
+  function createEnemies(positions, container) {
+    positions.forEach(xPos => {
+      const enemy = document.createElement('div');
+      enemy.className = 'enemy';
+      enemy.style.left = `${xPos}px`;
+      enemy.style.top = `100px`;
+      container.appendChild(enemy);
 
-        let direction = 1;
-        let speed = 3; // Velocidad aumentada
-        setInterval(() => {
-          const currentLeft = parseInt(enemy.style.left) || 0;
-          if (currentLeft > plat.x + plat.width - 40 || currentLeft < plat.x) {
-            direction *= -1;
-          }
-          enemy.style.left = `${currentLeft + (direction * speed)}px`;
-        }, 50);
+      let direction = 1;
+      const moveInterval = setInterval(() => {
+        if(!enemy.parentElement) clearInterval(moveInterval);
+        const currentLeft = parseInt(enemy.style.left) || 0;
+        if (currentLeft > window.innerWidth - 40 || currentLeft < 0) {
+          direction *= -1;
+        }
+        enemy.style.left = `${currentLeft + (direction * enemySpeed)}px`;
+      }, 50);
+    });
+  }
+
+  function checkEnemyCollision() {
+    const playerRect = {
+      x: playerPosition.x,
+      y: playerPosition.y,
+      width: 40,
+      height: 40
+    };
+
+    document.querySelectorAll('.enemy').forEach(enemy => {
+      const enemyRect = enemy.getBoundingClientRect();
+
+      // Colisión vertical (pisar enemigo)
+      if (playerRect.y + playerRect.height < enemyRect.y + 10 &&
+        playerRect.y + playerRect.height > enemyRect.y - 10 &&
+        playerRect.x + playerRect.width > enemyRect.x &&
+        playerRect.x < enemyRect.x + enemyRect.width) {
+
+        enemy.remove();
+        velocityY = JUMP_FORCE * 0.8; // Rebote al matar enemigo
+      }
+      // Colisión lateral (daño al jugador)
+      else if (playerRect.x < enemyRect.x + enemyRect.width &&
+        playerRect.x + playerRect.width > enemyRect.x &&
+        playerRect.y < enemyRect.y + enemyRect.height &&
+        playerRect.y + playerRect.height > enemyRect.y) {
+
+        currentHealth -= 20;
+        updateHealth();
+        if (currentHealth <= 0) gameOver();
       }
     });
   }
@@ -970,7 +1029,38 @@
       y: 100
     };
 
+    function checkObjectCollision() {
+      const playerRect = {
+        x: playerPosition.x,
+        y: playerPosition.y,
+        width: 40,
+        height: 40
+      };
+
+      document.querySelectorAll('.object').forEach(object => {
+        const objRect = object.getBoundingClientRect();
+
+        if (playerRect.x < objRect.x + objRect.width &&
+          playerRect.x + playerRect.width > objRect.x &&
+          playerRect.y < objRect.y + objRect.height &&
+          playerRect.y + playerRect.height > objRect.y) {
+
+          handleObjectCollection(object);
+        }
+      });
+    }
+
     function gameLoop() {
+      checkEnemyCollision();
+
+      if (!isGrounded) velocityY += GRAVITY;
+      playerPosition.y += velocityY;
+
+      player.style.left = `${playerPosition.x}px`;
+      player.style.top = `${playerPosition.y}px`;
+
+      requestAnimationFrame(gameLoop);
+      
       checkPlatformCollision();
 
       if (!isGrounded) {
