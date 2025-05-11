@@ -1,0 +1,400 @@
+diff --git a/index.html b/index.html
+index 608245a..cbb7fd1 100644
+--- a/index.html
++++ b/index.html
+@@ -239,6 +239,7 @@
+       letter-spacing: 0.5rem;
+     }
+
++    /* Fix fullscreen button positioning */
+     .fullscreen-btn {
+       position: fixed;
+       top: 20px;
+@@ -247,6 +248,47 @@
+       background: var(--glass-light);
+       backdrop-filter: blur(5px);
+       border: 1px solid var(--glass-border);
++      width: 40px;
++      height: 40px;
++      padding: 0;
++      display: flex;
++      justify-content: center;
++      align-items: center;
++    }
++
++    /* Enemy improvements */
++    .enemy {
++      position: absolute;
++      width: 40px;
++      height: 40px;
++      background: #d32f2f;
++      border-radius: 8px;
++      z-index: 2;
++      /* Remove float animation */
++    }
++
++    /* Spike improvements */
++    .spike {
++      position: absolute;
++      width: 30px;
++      height: 15px; /* Shorter height */
++      background: #d32f2f;
++      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
++      z-index: 2;
++      bottom: 0; /* Position at bottom of platform */
++      left: 50%;
++      transform: translateX(-50%);
++    }
++
++    /* Additional platform styling */
++    .platform {
++      position: absolute;
++      background: #4db6ac;
++      border-radius: 4px;
++      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
++      z-index: 1;
++      /* Add platform border for better visibility */
++      border: 2px solid var(--primary-dark);
+     }
+
+     .skip-btn {
+@@ -267,14 +309,6 @@
+       z-index: 2;
+     }
+
+-    .platform {
+-      position: absolute;
+-      background: #4db6ac;
+-      border-radius: 4px;
+-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+-      z-index: 1;
+-    }
+-
+     .object {
+       position: absolute;
+       width: 30px;
+@@ -286,16 +320,6 @@
+       cursor: pointer;
+     }
+
+-    .enemy {
+-      position: absolute;
+-      width: 40px;
+-      height: 40px;
+-      background: #d32f2f;
+-      border-radius: 8px;
+-      animation: float 3s infinite;
+-      z-index: 2;
+-    }
+-
+     .health-container {
+       position: fixed;
+       top: 20px;
+@@ -366,15 +390,6 @@
+       animation: movePlatform 4s infinite alternate;
+     }
+
+-    .spike {
+-      position: absolute;
+-      width: 30px;
+-      height: 30px;
+-      background: #d32f2f;
+-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+-      z-index: 2;
+-    }
+-
+     @keyframes movePlatform {
+       0% { transform: translateX(0); }
+       100% { transform: translateX(100px); }
+@@ -692,14 +707,6 @@
+     }
+   }
+
+-  function checkPlatformCollision() {
+-    const playerRect = {
+-      x: playerPosition.x,
+-      y: playerPosition.y,
+-      width: 40,
+-      height: 40
+-    };
+-
+     isGrounded = false;
+
+     document.querySelectorAll('.platform').forEach(platform => {
+@@ -855,42 +862,47 @@
+         music: 'music_act1.mp3',
+         name: 'act1Title',
+         platforms: [
+-          { x: 50, y: 550, width: 120, height: 15 },
+-          { x: 250, y: 470, width: 100, height: 15, moving: true },
+-          { x: 400, y: 400, width: 150, height: 15 },
+-          { x: 300, y: 320, width: 100, height: 15 },
+-          { x: 550, y: 250, width: 120, height: 15 },
+-          { x: 200, y: 180, width: 100, height: 15 },
+-          { x: 650, y: 150, width: 100, height: 15, moving: true },
+-          { x: 450, y: 80, width: 150, height: 15 }
++          // Starting area
++          { x: 50, y: 550, width: 200, height: 20 },
++          { x: 300, y: 500, width: 150, height: 20, moving: true },
++
++          // Middle section
++          { x: 150, y: 400, width: 120, height: 20 },
++          { x: 400, y: 380, width: 100, height: 20, spikes: true },
++          { x: 550, y: 350, width: 150, height: 20, moving: true },
++
++          // Upper section
++          { x: 200, y: 280, width: 100, height: 20 },
++          { x: 350, y: 250, width: 120, height: 20, spikes: true },
++          { x: 500, y: 220, width: 100, height: 20 },
++
++          // Final section
++          { x: 650, y: 180, width: 150, height: 20 },
++          { x: 450, y: 120, width: 100, height: 20, moving: true },
++          { x: 250, y: 80, width: 150, height: 20 }
+         ],
+         objects: [
+-          { x: 80, y: 520, type: 'health', value: 20 },
++          { x: 100, y: 520, type: 'health' },
+           { x: 350, y: 350, type: 'doubleJump' },
+-          { x: 620, y: 200, type: 'memory' },
+-          { x: 280, y: 280, type: 'memory' },
+-          { x: 500, y: 220, type: 'memory' },
+-          { x: 150, y: 150, type: 'memory' },
+-          { x: 700, y: 100, type: 'memory' }
++          // Memory objects
++          { x: 200, y: 370, type: 'memory' },
++          { x: 450, y: 330, type: 'memory' },
++          { x: 600, y: 170, type: 'memory' },
++          { x: 300, y: 230, type: 'memory' },
++          { x: 500, y: 100, type: 'memory' }
++        ],
++        enemies: [
++          { x: 400, y: 450, patrol: 150 },
++          { x: 200, y: 300, patrol: 100 },
++          { x: 600, y: 200, patrol: 120 }
+         ],
+-        enemies: [500, 300, 600, 200],
+         dialog: "act1Dialog",
+-        door: { x: 750, y: 30 }
++        door: { x: 700, y: 40 }
+       },
+-      2: {
+-        bg: 'act2_background.png',
+-        music: 'music_act2.mp3',
+-        name: 'act2Title',
+-        platforms: [],
+-        objects: [],
+-        enemies: [],
+-        dialog: "act2Dialog"
+-      }
++      2: { /* Act 2 configuration */ }
+     };
+
+     const act = acts[actNumber];
+-    if (!act) return;
+-
+     memoriesCollected = 0;
+     totalMemories = act.objects.filter(o => o.type === 'memory').length;
+
+@@ -901,7 +913,7 @@
+         <div class="memory-counter">${translations[currentLanguage].memoriesCollected} 0/${totalMemories}</div>
+       `;
+
+-      // Crear puerta
++// Create door
+       const door = document.createElement('div');
+       door.className = 'door';
+       door.style.left = `${act.door.x}px`;
+@@ -920,14 +932,115 @@
+
+       loadBackground(act.bg, container);
+       playMusic(act.music);
+-      initPlayer(container);
+       createPlatforms(act.platforms, container);
+       createObjects(act.objects, container);
+       createEnemies(act.enemies, container);
++      initPlayer(container);
+       showDialog(act.dialog);
+     });
+   }
+
++  // Improved platform creation with spikes
++  function createPlatforms(platforms, container) {
++    platforms.forEach(plat => {
++      const platform = document.createElement('div');
++      platform.className = `platform ${plat.moving ? 'moving-platform' : ''}`;
++      platform.style.width = `${plat.width}px`;
++      platform.style.height = `${plat.height}px`;
++      platform.style.left = `${plat.x}px`;
++      platform.style.top = `${plat.y}px`;
++
++      if (plat.moving) {
++        platform.style.animationDuration = `${Math.random() * 3 + 2}s`;
++      }
++
++      if (plat.spikes) {
++        const spikeCount = Math.floor(plat.width / 40);
++        for (let i = 0; i < spikeCount; i++) {
++          const spike = document.createElement('div');
++          spike.className = 'spike';
++          spike.style.left = `${i * 40 + 20}px`;
++          platform.appendChild(spike);
++        }
++      }
++
++      container.appendChild(platform);
++    });
++  }
++
++  // Improved enemy AI
++  function createEnemies(enemies, container) {
++    enemies.forEach(enemy => {
++      const enemyElement = document.createElement('div');
++      enemyElement.className = 'enemy';
++      enemyElement.style.left = `${enemy.x}px`;
++      enemyElement.style.top = `${enemy.y}px`;
++      container.appendChild(enemyElement);
++
++      let direction = 1;
++      const moveInterval = setInterval(() => {
++        if (!enemyElement.parentElement) {
++          clearInterval(moveInterval);
++          return;
++        }
++
++        const currentLeft = parseInt(enemyElement.style.left) || 0;
++        if (currentLeft > enemy.x + enemy.patrol || currentLeft < enemy.x - enemy.patrol) {
++          direction *= -1;
++        }
++        enemyElement.style.left = `${currentLeft + (direction * 2)}px`;
++      }, 50);
++    });
++  }
++
++  // Enhanced collision detection
++  function checkPlatformCollision() {
++    const playerRect = {
++      x: playerPosition.x,
++      y: playerPosition.y,
++      width: 40,
++      height: 40
++    };
++
++    isGrounded = false;
++
++    document.querySelectorAll('.platform').forEach(platform => {
++      const platRect = platform.getBoundingClientRect();
++
++      // Platform collision
++      if (playerRect.x < platRect.x + platRect.width &&
++        playerRect.x + playerRect.width > platRect.x &&
++        playerRect.y + playerRect.height >= platRect.y &&
++        playerRect.y < platRect.y + platRect.height) {
++
++        if (velocityY > 0) {
++          playerPosition.y = platRect.y - playerRect.height;
++          velocityY = 0;
++          isGrounded = true;
++        }
++      }
++
++      // Spike collision
++      platform.querySelectorAll('.spike').forEach(spike => {
++        const spikeRect = spike.getBoundingClientRect();
++        if (playerRect.x < spikeRect.x + spikeRect.width &&
++          playerRect.x + playerRect.width > spikeRect.x &&
++          playerRect.y + playerRect.height > spikeRect.y &&
++          playerRect.y < spikeRect.y + spikeRect.height) {
++
++          // Only take damage when falling onto spikes
++          if (velocityY > 0) {
++            currentHealth -= 30;
++            updateHealth();
++            if (currentHealth <= 0) gameOver();
++            // Bounce off spikes
++            velocityY = JUMP_FORCE * 0.5;
++          }
++        }
++      });
++    });
++  }
++
+   function showCurtain(actName, callback) {
+     const curtain = document.getElementById('curtain');
+     const curtainText = curtain.querySelector('.curtain-text');
+@@ -975,54 +1088,6 @@
+     }
+   }
+
+-  function createPlatforms(platforms, container) {
+-    platforms.forEach(plat => {
+-      const platform = document.createElement('div');
+-      platform.className = `platform ${plat.moving ? 'moving-platform' : ''}`;
+-      platform.style.width = `${plat.width}px`;
+-      platform.style.height = `${plat.height}px`;
+-      platform.style.left = `${plat.x}px`;
+-      platform.style.top = `${plat.y}px`;
+-
+-      if (plat.moving) {
+-        platform.style.animationDuration = `${Math.random() * 3 + 2}s`;
+-      }
+-
+-      // Añadir spikes aleatorios
+-      if (Math.random() > 0.7) {
+-        const spike = document.createElement('div');
+-        spike.className = 'spike';
+-        spike.style.left = `${Math.random() * plat.width}px`;
+-        platform.appendChild(spike);
+-      }
+-
+-      container.appendChild(platform);
+-    });
+-  }
+-
+-  function createEnemies(positions, container) {
+-    positions.forEach(xPos => {
+-      const enemy = document.createElement('div');
+-      enemy.className = 'enemy';
+-      enemy.style.left = `${xPos}px`;
+-      enemy.style.top = `100px`;
+-      container.appendChild(enemy);
+-
+-      let direction = 1;
+-      const moveInterval = setInterval(() => {
+-        if (!enemy.parentElement) {
+-          clearInterval(moveInterval);
+-          return;
+-        }
+-        const currentLeft = parseInt(enemy.style.left) || 0;
+-        if (currentLeft > window.innerWidth - 40 || currentLeft < 0) {
+-          direction *= -1;
+-        }
+-        enemy.style.left = `${currentLeft + (direction * enemySpeed)}px`;
+-      }, 50);
+-    });
+-  }
+-
+   function createObjects(objects, container) {
+     objects.forEach(obj => {
+       const object = document.createElement('div');
+@@ -1141,11 +1206,18 @@
+     }, 500);
+   }
+
+-  // Inicialización del juego
++  // Initialize the game
+   document.addEventListener('DOMContentLoaded', () => {
+     loadSettings();
+     changeLanguage(currentLanguage);
+
++    document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
++    document.getElementById('skipBtn').addEventListener('click', closeDialog);
++
++    // Make sure fullscreen button stays on top
++    document.getElementById('fullscreenBtn').style.zIndex = '1001';
++  });
++
+     document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+
+     document.addEventListener('keydown', (e) => {
+
