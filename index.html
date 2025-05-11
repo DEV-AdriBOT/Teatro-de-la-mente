@@ -264,18 +264,17 @@
       background: #d32f2f;
       border-radius: 8px;
       z-index: 2;
-      /* Remove float animation */
     }
 
     /* Spike improvements */
     .spike {
       position: absolute;
       width: 30px;
-      height: 15px; /* Shorter height */
+      height: 15px;
       background: #d32f2f;
       clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
       z-index: 2;
-      bottom: 0; /* Position at bottom of platform */
+      bottom: 0;
       left: 50%;
       transform: translateX(-50%);
     }
@@ -287,7 +286,6 @@
       border-radius: 4px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       z-index: 1;
-      /* Add platform border for better visibility */
       border: 2px solid var(--primary-dark);
     }
 
@@ -707,6 +705,14 @@
     }
   }
 
+  function checkPlatformCollision() {
+    const playerRect = {
+      x: playerPosition.x,
+      y: playerPosition.y,
+      width: 40,
+      height: 40
+    };
+
     isGrounded = false;
 
     document.querySelectorAll('.platform').forEach(platform => {
@@ -913,7 +919,7 @@
         <div class="memory-counter">${translations[currentLanguage].memoriesCollected} 0/${totalMemories}</div>
       `;
 
-// Create door
+      // Create door
       const door = document.createElement('div');
       door.className = 'door';
       door.style.left = `${act.door.x}px`;
@@ -940,7 +946,6 @@
     });
   }
 
-  // Improved platform creation with spikes
   function createPlatforms(platforms, container) {
     platforms.forEach(plat => {
       const platform = document.createElement('div');
@@ -968,7 +973,6 @@
     });
   }
 
-  // Improved enemy AI
   function createEnemies(enemies, container) {
     enemies.forEach(enemy => {
       const enemyElement = document.createElement('div');
@@ -990,54 +994,6 @@
         }
         enemyElement.style.left = `${currentLeft + (direction * 2)}px`;
       }, 50);
-    });
-  }
-
-  // Enhanced collision detection
-  function checkPlatformCollision() {
-    const playerRect = {
-      x: playerPosition.x,
-      y: playerPosition.y,
-      width: 40,
-      height: 40
-    };
-
-    isGrounded = false;
-
-    document.querySelectorAll('.platform').forEach(platform => {
-      const platRect = platform.getBoundingClientRect();
-
-      // Platform collision
-      if (playerRect.x < platRect.x + platRect.width &&
-        playerRect.x + playerRect.width > platRect.x &&
-        playerRect.y + playerRect.height >= platRect.y &&
-        playerRect.y < platRect.y + platRect.height) {
-
-        if (velocityY > 0) {
-          playerPosition.y = platRect.y - playerRect.height;
-          velocityY = 0;
-          isGrounded = true;
-        }
-      }
-
-      // Spike collision
-      platform.querySelectorAll('.spike').forEach(spike => {
-        const spikeRect = spike.getBoundingClientRect();
-        if (playerRect.x < spikeRect.x + spikeRect.width &&
-          playerRect.x + playerRect.width > spikeRect.x &&
-          playerRect.y + playerRect.height > spikeRect.y &&
-          playerRect.y < spikeRect.y + spikeRect.height) {
-
-          // Only take damage when falling onto spikes
-          if (velocityY > 0) {
-            currentHealth -= 30;
-            updateHealth();
-            if (currentHealth <= 0) gameOver();
-            // Bounce off spikes
-            velocityY = JUMP_FORCE * 0.5;
-          }
-        }
-      });
     });
   }
 
@@ -1216,9 +1172,6 @@
 
     // Make sure fullscreen button stays on top
     document.getElementById('fullscreenBtn').style.zIndex = '1001';
-  });
-
-    document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && document.fullscreenElement) {
@@ -1229,8 +1182,6 @@
     document.getElementById('volumeSlider').addEventListener('input', (e) => {
       settings.volume = e.target.value;
     });
-
-    document.getElementById('skipBtn').addEventListener('click', closeDialog);
   });
 
   // Hacer funciones accesibles globalmente
