@@ -422,15 +422,15 @@
   </div>
 
   <div class="btn-group">
-    <button class="btn" onclick="showScreen('gameScreen')">
+    <button class="btn" id="playBtn">
       <i class="fas fa-play"></i>
       <span data-i18n="play">Jugar</span>
     </button>
-    <button class="btn btn-outline" onclick="showScreen('settingsScreen')">
+    <button class="btn btn-outline" id="settingsBtn">
       <i class="fas fa-cog"></i>
       <span data-i18n="settings">Ajustes</span>
     </button>
-    <button class="btn btn-outline" onclick="exitGame()">
+    <button class="btn btn-outline" id="exitBtn">
       <i class="fas fa-sign-out-alt"></i>
       <span data-i18n="exit">Salir</span>
     </button>
@@ -474,12 +474,11 @@
     </div>
 
     <div class="btn-group" style="margin-top: 2rem;">
-      <button class="btn" onclick="saveSettings()">
+      <button class="btn" id="saveSettingsBtn">
         <i class="fas fa-save"></i>
         <span data-i18n="save">Guardar</span>
       </button>
-      <button class="btn btn-outline" onclick="showScreen('startScreen')">
-        <i class="fas fa-arrow-left"></i>
+      <button class="btn btn-outline" id="backToStartBtn">       <i class="fas fa-arrow-left"></i>
         <span data-i18n="back">Volver</span>
       </button>
     </div>
@@ -515,11 +514,35 @@
       continue: "Continuar",
       act1Title: "Acto I: El Olvido",
       act1Dialog: "¿Dónde estoy...? Estos seres... parecen alimentarse de mis recuerdos.",
+      act1PuzzleIntro: "Siento que algunas cosas aquí son efímeras... se desvanecen al tocarlas.",
+      act1ObjectTouched: "Se desvaneció...",
       memoriesCollected: "Recuerdos encontrados: ",
       doorRequirement: "¡Necesitas encontrar todos los recuerdos!",
       memoryFound1: "¡Un recuerdo fragmentado!",
       memoryFound2: "¡Otro pedazo de mi pasado!",
-      memoryFound3: "¡El último fragmento! Ahora recuerdo..."
+      memoryFound3: "¡El último fragmento! Ahora recuerdo...",
+      act2Title: "Acto II: El Miedo",
+      act2Dialog: "Este lugar... está lleno de puertas cerradas. El miedo me paraliza.",
+      act2RiddlePrompt: "Resuelve este acertijo para abrir la puerta: ",
+      act2RiddleCorrect: "La puerta se ha abierto.",
+      act2RiddleIncorrect: "No es la respuesta correcta.",
+      act2DoorLocked: "Esta puerta está cerrada. Necesito una llave o resolver un acertijo.",
+      act2KeyFound: "¡He encontrado una llave!",
+      act2PuzzleIntro: "Las puertas aquí parecen responder a algo más que simples llaves... quizás al ingenio.",
+      act3Title: "Acto III: La Culpa",
+      act3Dialog: "Cada elección pesa... siento la culpa crecer o disminuir con cada paso.",
+      act3DecisionPrompt: "Una bifurcación en el camino. ¿Qué eliges?",
+      act3Choice1: "Tomar el camino más fácil, ignorando las sombras.",
+      act3Choice2: "Enfrentar las sombras, aunque sea más difícil.",
+      act3EasyPath: "Has elegido la senda más leve. Las sombras parecen retroceder, por ahora.",
+      act3HardPath: "Has elegido enfrentar tus miedos. El camino se vuelve más arduo.",
+      act4Title: "Acto IV: La Ira",
+      act4Dialog: "Una furia me consume... todo se mueve tan rápido, caótico.",
+      act4PlatformWarning: "¡Cuidado! ¡Estas plataformas son traicioneras!",
+      act5Title: "Acto V: La Aceptación",
+      act5Dialog: "Finalmente... la calma. He llegado a entender, a aceptar.",
+      act5PuzzleHint: "Los últimos fragmentos de paz se encuentran en la serenidad.",
+      act5EndGame: "Has completado tu viaje. La mente encuentra su equilibrio."
     },
     en: {
       title: "Theater of the Mind",
@@ -663,6 +686,9 @@
   let memoriesCollected = 0;
   let totalMemories = 0;
   let requiredMemories = 5;
+  let playerKeys = []; // Stores IDs of collected keys
+  let currentActDifficulty = 'normal'; // Can be 'easy', 'hard', or 'normal' by default
+  let enemySpeed = 2;
 
   function updateHealth() {
     const container = document.getElementById('healthContainer');
@@ -788,11 +814,12 @@
         bg: 'act1_background.png',
         music: 'music_act1.mp3',
         name: 'act1Title',
+        introDialog: 'act1PuzzleIntro', // Added intro dialog for the puzzle
         platforms: [
           { x: 50, y: 550, width: 120, height: 15 },
           { x: 250, y: 470, width: 100, height: 15, moving: true },
           { x: 400, y: 400, width: 150, height: 15 },
-          { x: 300, y: 320, width: 100, height: 15 },
+          { x: 300, y: 320, width: 100, height: 15 }, // This platform could be a vanishing one
           { x: 550, y: 250, width: 120, height: 15 },
           { x: 200, y: 180, width: 100, height: 15 },
           { x: 650, y: 150, width: 100, height: 15, moving: true },
@@ -801,6 +828,8 @@
         objects: [
           { x: 80, y: 520, type: 'health', value: 20 },
           { x: 350, y: 350, type: 'doubleJump' },
+          { x: 100, y: 400, type: 'vanishing' }, // Example vanishing object
+          { x: 450, y: 350, type: 'vanishing' }, // Example vanishing object, player needs to touch it to reveal a path or similar
           { x: 620, y: 200, type: 'memory' },
           { x: 280, y: 280, type: 'memory' },
           { x: 500, y: 220, type: 'memory' },
@@ -811,46 +840,235 @@
         dialog: "act1Dialog",
         door: { x: 750, y: 30 }
       },
-      2: { /* Configuración Acto II */ }
+      2: {
+        bg: 'act2_background.png',
+        music: 'music_act2.mp3',
+        name: 'act2Title',
+        introDialog: 'act2PuzzleIntro',
+        platforms: [
+          { x: 50, y: 550, width: 150, height: 20 },
+          { x: 300, y: 450, width: 100, height: 20 },
+          { x: 500, y: 350, width: 120, height: 20, moving: true },
+          { x: 100, y: 250, width: 180, height: 20 },
+          { x: 400, y: 150, width: 100, height: 20 }
+        ],
+        objects: [
+          { x: 150, y: 220, type: 'key', id: 'key1' }, // Key for a door
+          { x: 550, y: 320, type: 'riddle_trigger', riddle: 'riddle1' } // Triggers a riddle
+        ],
+        enemies: [200, 400],
+        dialog: "act2Dialog",
+        doors: [
+          { x: 700, y: 480, id: 'door1', locked: 'key', keyId: 'key1', nextAct: 3 },
+          { x: 700, y: 80, id: 'door2', locked: 'riddle', riddleId: 'riddle1', riddlePrompt: "Tengo ciudades, pero no casas. Tengo montañas, pero no árboles. Tengo agua, pero no peces. ¿Qué soy?", riddleAnswer: "un mapa", nextAct: 3 }
+        ]
+      },
+      3: {
+        bg: 'act3_background.png',
+        music: 'music_act3.mp3',
+        name: 'act3Title',
+        introDialog: 'act3Dialog',
+        decisionPoints: [
+          {
+            id: 'dp1',
+            prompt: 'act3DecisionPrompt',
+            choices: [
+              { textKey: 'act3Choice1', outcome: 'easy', consequenceTextKey: 'act3EasyPath' },
+              { textKey: 'act3Choice2', outcome: 'hard', consequenceTextKey: 'act3HardPath' }
+            ],
+            x: 400, y: 300 // Position of the decision trigger object
+          }
+        ],
+        // Base level configuration, will be modified by decisions
+        platforms_easy: [
+          { x: 50, y: 550, width: 200, height: 20 },
+          { x: 300, y: 450, width: 150, height: 20 },
+          { x: 500, y: 350, width: 120, height: 20 },
+          { x: 100, y: 250, width: 180, height: 20 },
+          { x: 400, y: 150, width: 100, height: 20 }
+        ],
+        platforms_hard: [
+          { x: 50, y: 550, width: 150, height: 20 },
+          { x: 280, y: 460, width: 100, height: 20, moving: true, animationDuration: '3s' },
+          { x: 500, y: 380, width: 100, height: 20 },
+          { x: 100, y: 280, width: 120, height: 20, moving: true, animationDuration: '2.5s' },
+          { x: 350, y: 180, width: 80, height: 20 }
+        ],
+        enemies_easy: [ {x: 200, y: 100, speed: 1}, {x: 600, y: 200, speed: 1} ],
+        enemies_hard: [ {x: 150, y: 100, speed: 2}, {x: 450, y: 100, speed: 2.5}, {x: 600, y: 250, speed: 2} ],
+        objects: [
+          // Memories or other collectibles common to both paths
+          { x: 100, y: 520, type: 'memory' },
+          { x: 600, y: 320, type: 'memory' }
+        ],
+        door: { x: 750, y: 50, nextAct: 4 } // Door to Act IV
+      },
+      4: {
+        bg: 'act4_background.png',
+        music: 'music_act4.mp3',
+        name: 'act4Title',
+        introDialog: 'act4Dialog',
+        platforms: [
+          // Platforms that move horizontally very fast
+          { x: 50, y: 550, width: 100, height: 15, moving: true, horizontal: true, speed: 5, range: 200 },
+          { x: 400, y: 480, width: 100, height: 15, moving: true, horizontal: true, speed: 7, range: 150 },
+          // Platforms that move vertically very fast
+          { x: 200, y: 400, width: 100, height: 15, moving: true, vertical: true, speed: 6, range: 100 },
+          { x: 550, y: 300, width: 120, height: 15, moving: true, vertical: true, speed: 8, range: 120 },
+          // Some static platforms for respite or to reach fast ones
+          { x: 0, y: 580, width: 800, height: 20 }, // Ground platform
+          { x: 350, y: 200, width: 100, height: 15 },
+          { x: 650, y: 100, width: 100, height: 15 }
+        ],
+        objects: [
+          { x: 700, y: 70, type: 'memory' } // Example memory object
+        ],
+        enemies: [], // Focus on platforming challenge for this act
+        dialog: "act4Dialog",
+        door: { x: 50, y: 50, nextAct: 5 } // Door to Act V
+      },
+      5: {
+        bg: 'act5_background.png',
+        music: 'music_act5.mp3',
+        name: 'act5Title',
+        introDialog: 'act5Dialog',
+        platforms: [
+          { x: 0, y: 580, width: 800, height: 20 }, // Ground
+          { x: 100, y: 500, width: 150, height: 15 },
+          { x: 300, y: 420, width: 150, height: 15 },
+          { x: 500, y: 340, width: 150, height: 15 },
+          { x: 300, y: 260, width: 150, height: 15 },
+          { x: 100, y: 180, width: 150, height: 15 } // Platform leading to a final collectible or exit
+        ],
+        objects: [
+          // Example: Collect 3 'peace_fragments' to signify acceptance
+          { x: 150, y: 470, type: 'memory', id: 'peace1', dialogKey: 'act5PuzzleHint' },
+          { x: 350, y: 390, type: 'memory', id: 'peace2', dialogKey: 'act5PuzzleHint' },
+          { x: 150, y: 150, type: 'memory', id: 'peace3', dialogKey: 'act5PuzzleHint' }
+        ],
+        enemies: [], // No enemies for a relaxed atmosphere
+        dialog: "act5Dialog",
+        door: { x: 700, y: 100, nextAct: 'end' } // Special 'end' marker for the final door
+      }
     };
 
-    const act = acts[actNumber];
-    memoriesCollected = 0;
-    totalMemories = act.objects.filter(o => o.type === 'memory').length;
+    const act = acts[actNumber];r];
+    let actConfig = { ...act }; // Clone base act config
 
-    showCurtain(translations[currentLanguage][act.name], () => {
+    // For Act III, dynamically set platforms and enemies based on difficulty
+    if (actNumber === 3 && actConfig.decisionPoints) {
+      if (currentActDifficulty === 'easy') {
+        actConfig.platforms = actConfig.platforms_easy;
+        actConfig.enemies = actConfig.enemies_easy;
+      } else if (currentActDifficulty === 'hard') {
+        actConfig.platforms = actConfig.platforms_hard;
+        actConfig.enemies = actConfig.enemies_hard;
+      } else {
+        // Default to easy or a predefined normal if not specified, or handle error
+        actConfig.platforms = actConfig.platforms_easy;
+        actConfig.enemies = actConfig.enemies_easy;
+      }
+    }
+
+    memoriesCollected = 0;
+    playerKeys = []; // Reset keys for new act
+    if (actConfig.objects && Array.isArray(actConfig.objects)) {
+      totalMemories = actConfig.objects.filter(o => o.type === 'memory').length;
+    } else {
+      totalMemories = 0;
+    }
+
+    showCurtain(translations[currentLanguage][actConfig.name], () => {
       const container = document.getElementById('actContainer');
       container.innerHTML = `
         <div class="health-container" id="healthContainer"></div>
         <div class="memory-counter">${translations[currentLanguage].memoriesCollected} 0/${totalMemories}</div>
       `;
 
-      // Crear puerta
-      const door = document.createElement('div');
-      door.className = 'door';
-      door.style.left = `${act.door.x}px`;
-      door.style.top = `${act.door.y}px`;
-      door.onclick = () => {
-        if(memoriesCollected >= requiredMemories) {
-          currentAct = 2;
-          showCurtain(translations[currentLanguage].act2Title, () => {
-            startAct(currentAct); // Iniciar Acto II directamente
-          });
-        } else {
-          showDialog('doorRequirement');
-        }
-      };
-      container.appendChild(door);
+      // Crear puertas para el acto actual
+      if (actConfig.doors && actConfig.doors.length > 0) {
+        actConfig.doors.forEach(doorData => {
+          const doorElement = document.createElement('div');
+          doorElement.className = 'door';
+          doorElement.id = doorData.id;
+          doorElement.style.left = `${doorData.x}px`;
+          doorElement.style.top = `${doorData.y}px`;
+          doorElement.dataset.locked = "true";
 
-      loadBackground(act.bg, container);
-      playMusic(act.music);
+          doorElement.onclick = () => {
+            if (doorData.locked === 'key') {
+              if (playerKeys.includes(doorData.keyId)) {
+                showDialog(translations[currentLanguage].act2RiddleCorrect || "Door unlocked!");
+                currentAct = doorData.nextAct;
+                startAct(currentAct);
+              } else {
+                showDialog(translations[currentLanguage].act2DoorLocked || "This door is locked.");
+              }
+            } else if (doorData.locked === 'riddle') {
+              if (doorElement.dataset.locked === "true") {
+                showDialog(translations[currentLanguage].act2DoorLocked + " Solve the riddle.");
+              } else {
+                currentAct = doorData.nextAct;
+                startAct(currentAct);
+              }
+            }
+          };
+          container.appendChild(doorElement);
+        });
+      } else if (actConfig.door) { // Fallback for single door acts (Act I, and potentially Act III if no branching doors)
+        const door = document.createElement('div');
+        door.className = 'door';
+        door.style.left = `${actConfig.door.x}px`;
+        door.style.top = `${actConfig.door.y}px`;
+        door.onclick = () => {
+          // Generic door for Act I and Act III (if no specific doors array)
+          if (actNumber === 1 && memoriesCollected >= requiredMemories) {
+            currentAct = actConfig.door.nextAct || 2;
+            let nextActTitle = acts[currentAct] ? translations[currentLanguage][acts[currentAct].name] : "Next Act";
+            showCurtain(nextActTitle, () => startAct(currentAct));
+          } else if (actNumber === 3) { // Act III door always leads to next act after decision
+            currentAct = actConfig.door.nextAct || 4;
+            let nextActTitle = acts[currentAct] ? translations[currentLanguage][acts[currentAct].name] : "Next Act";
+            showCurtain(nextActTitle, () => startAct(currentAct));
+          } else if (actNumber === 1) { // Act I door locked
+            showDialog('doorRequirement');
+          }
+        };
+        container.appendChild(door);
+      }
+
+      loadBackground(actConfig.bg, container);
+      playMusic(actConfig.music);
       initPlayer(container);
-      createPlatforms(act.platforms, container);
-      createObjects(act.objects, container);
-      createEnemies(act.platforms, container);
-      showDialog(act.dialog);
+      createPlatforms(actConfig.platforms || [], container); // Pass the dynamically chosen platforms
+      createObjects(actConfig.objects || [], container);
+      createEnemies(actConfig.enemies || [], container); // Pass the dynamically chosen enemies
 
-      setInterval(checkEnemyCollision, 100);
+      showDialog(actConfig.dialog);
+      if (actConfig.introDialog) {
+        setTimeout(() => {
+          showDialog(actConfig.introDialog);
+        }, 4000);
+      }
+      // Show platform warning for Act IV
+      if (actNumber === 4 && translations[currentLanguage].act4PlatformWarning) {
+        setTimeout(() => {
+          showDialog("act4PlatformWarning");
+        }, 6000); // Show after the main intro dialog
+      }
+      // For Act III, if there's a decision point, create its trigger object
+      if (actNumber === 3 && actConfig.decisionPoints && actConfig.decisionPoints.length > 0) {
+        actConfig.decisionPoints.forEach(dp => {
+          const decisionTrigger = document.createElement('div');
+          decisionTrigger.className = 'object'; // Style as an object
+          decisionTrigger.style.left = `${dp.x}px`;
+          decisionTrigger.style.top = `${dp.y}px`;
+          decisionTrigger.style.background = '#FF9800'; // Orange for decision triggers
+          decisionTrigger.dataset.type = 'decision_trigger';
+          decisionTrigger.dataset.decisionId = dp.id;
+          decisionTrigger.addEventListener('click', () => presentDecision(dp));
+          container.appendChild(decisionTrigger);
+        });  }Removed: Moved to gameLoop
     });
   }
 
@@ -900,30 +1118,80 @@
       document.body.appendChild(musicError);
     }
   }
-
   function createPlatforms(platforms, container) {
     platforms.forEach(plat => {
-      const platform = document.createElement('div');
-      platform.className = `platform ${plat.moving ? 'moving-platform' : ''}`;
+      const platform = document.createElement(\'div\');
+      platform.className = `platform`; // Base class
       platform.style.width = `${plat.width}px`;
       platform.style.height = `${plat.height}px`;
       platform.style.left = `${plat.x}px`;
       platform.style.top = `${plat.y}px`;
+      platform.dataset.originalX = plat.x;
+      platform.dataset.originalY = plat.y;
 
-      if(plat.moving) {
-        platform.style.animationDuration = `${Math.random() * 3 + 2}s`;
+      if (plat.moving) {
+        if (plat.horizontal) {
+          platform.classList.add(\'fast-horizontal-platform\');
+          animatePlatformHorizontal(platform, plat.speed, plat.range, plat.x);
+        } else if (plat.vertical) {
+          platform.classList.add(\'fast-vertical-platform\');
+          animatePlatformVertical(platform, plat.speed, plat.range, plat.y);
+        } else {
+          // Default moving platform (like in Act I)
+          platform.classList.add(\'moving-platform\');
+          platform.style.animationDuration = plat.animationDuration || `${Math.random() * 3 + 2}s`;
+        }
       }
-
-      // Añadir spikes aleatorios
-      if(Math.random() > 0.7) {
-        const spike = document.createElement('div');
-        spike.className = 'spike';
-        spike.style.left = `${Math.random() * plat.width}px`;
-        platform.appendChild(spike);
-      }
-
       container.appendChild(platform);
     });
+  }
+
+  function animatePlatformHorizontal(platformElement, speed, range, startX) {
+    let position = 0;
+    let direction = 1;
+    const effectiveSpeed = speed * 0.1; // Adjust speed factor as needed
+
+    function move() {
+      if (!platformElement.isConnected) return; // Stop if platform is removed
+      position += direction * effectiveSpeed;
+      platformElement.style.transform = `translateX(${position}px)`;
+
+      if (position > range || position < 0) {
+        direction *= -1;
+        // Clamp position to prevent overshooting due to large speed steps
+        position = Math.max(0, Math.min(position, range));
+      }
+      requestAnimationFrame(move);
+    }
+    move();
+  }
+
+  function animatePlatformVertical(platformElement, speed, range, startY) {
+    let position = 0;
+    let direction = 1;
+    const effectiveSpeed = speed * 0.1; // Adjust speed factor as needed
+
+    function move() {
+      if (!platformElement.isConnected) return; // Stop if platform is removed
+      position += direction * effectiveSpeed;
+      platformElement.style.transform = `translateY(${position}px)`;
+
+      if (position > range || position < 0) {
+        direction *= -1;
+        position = Math.max(0, Math.min(position, range));
+      }
+      requestAnimationFrame(move);
+    }
+    move();
+  }
+
+  function createEnemies(positions, container) { document.createElement(\'div\');
+    //   spike.className = \'spike\';
+    //   spike.style.left = `${Math.random() * plat.width}px`;
+    //   platform.appendChild(spike);
+    // }
+    container.appendChild(platform);
+  });
   }
 
   function createEnemies(positions, container) {
@@ -977,181 +1245,325 @@
         if (currentHealth <= 0) gameOver();
       }
     });
-  }
+    function createObjects(objects, container) {
+      objects.forEach(obj => {
+        const object = document.createElement('div');
+        object.className = 'object';
+        object.style.left = `${obj.x}px`;
+        object.style.top = `${obj.y}px`;
+        object.dataset.type = obj.type;
 
-  function createObjects(objects, container) {
-    objects.forEach(obj => {
-      const object = document.createElement('div');
-      object.className = 'object';
-      object.style.left = `${obj.x}px`;
-      object.style.top = `${obj.y}px`;
-      object.dataset.type = obj.type;
-
-      if (obj.type === 'health') {
-        object.style.background = '#00C853';
-        object.addEventListener('click', () => {
-          currentHealth = Math.min(100, currentHealth + obj.value);
-          updateHealth();
-          object.remove();
-        });
-      }
-
-      if (obj.type === 'doubleJump') {
-        object.style.background = '#FFD600';
-        object.addEventListener('click', () => {
-          GRAVITY = 0.3;
-          setTimeout(() => GRAVITY = 0.5, 10000);
-          object.remove();
-        });
-      }
-
-      if (obj.type === 'memory') {
-        object.addEventListener('click', () => {
-          memoriesCollected++;
-          document.querySelector('.memory-counter').textContent =
-            `${translations[currentLanguage].memoriesCollected} ${memoriesCollected}/${totalMemories}`;
-          showDialog(`memoryFound${memoriesCollected}`);
-          object.remove();
-        });
-      }
-
-      container.appendChild(object);
-    });
-  }
-
-  function initPlayer(container) {
-    const player = document.createElement('div');
-    player.className = 'player';
-    container.appendChild(player);
-
-    playerPosition = {
-      x: 100,
-      y: 100
-    };
-
-    function checkObjectCollision() {
-      const playerRect = {
-        x: playerPosition.x,
-        y: playerPosition.y,
-        width: 40,
-        height: 40
-      };
-
-      document.querySelectorAll('.object').forEach(object => {
-        const objRect = object.getBoundingClientRect();
-
-        if (playerRect.x < objRect.x + objRect.width &&
-          playerRect.x + playerRect.width > objRect.x &&
-          playerRect.y < objRect.y + objRect.height &&
-          playerRect.y + playerRect.height > objRect.y) {
-
-          handleObjectCollection(object);
+        if (obj.type === 'health') {
+          object.style.background = '#00C853';
+          object.addEventListener('click', () => {
+            currentHealth = Math.min(100, currentHealth + obj.value);
+            updateHealth();
+            object.remove();
+          });
         }
+
+        if (obj.type === 'doubleJump') {
+          object.style.background = '#FFD600';
+          object.addEventListener('click', () => {
+            GRAVITY = 0.3;
+            setTimeout(() => GRAVITY = 0.5, 10000);
+            object.remove();
+          });
+        }
+
+        if (obj.type === 'memory') {
+          object.addEventListener('click', () => {
+            memoriesCollected++;
+            document.querySelector('.memory-counter').textContent =
+              `${translations[currentLanguage].memoriesCollected} ${memoriesCollected}/${totalMemories}`;
+            showDialog(`memoryFound${memoriesCollected}`);
+            object.remove();
+          });
+        }
+
+        if (obj.type === 'vanishing') {
+          object.style.background = '#9C27B0'; // Purple for vanishing objects
+          object.style.opacity = '0.8';
+          object.addEventListener('click', () => {
+            showDialog('act1ObjectTouched');
+            object.style.opacity = '0.3';
+            setTimeout(() => {
+              object.remove();
+            }, 500);
+          });
+        }
+
+        if (obj.type === 'key') { // Logic for collecting keys
+          object.style.background = '#FFC107'; // Amber for keys
+          object.dataset.keyId = obj.id;
+          object.addEventListener('click', () => {
+            if (!playerKeys.includes(obj.id)) {
+              playerKeys.push(obj.id);
+              showDialog('act2KeyFound');
+              object.remove();
+            }
+          });
+        }
+
+        if (obj.type === 'riddle_trigger') { // Logic for triggering riddles
+          object.style.background = '#2196F3'; // Blue for riddle triggers
+          object.dataset.riddleId = obj.riddle;
+          object.addEventListener('click', () => {
+            const currentActData = acts[currentAct];
+            const doorData = currentActData.doors.find(d => d.riddleId === obj.riddle);
+            if (doorData) {
+              promptRiddle(doorData);
+            }
+          });
+        }
+
+        if (obj.type === 'decision_trigger') { // Logic for triggering decisions in Act III
+          object.style.background = '#FF9800'; // Orange for decision triggers
+          object.dataset.decisionId = obj.id;
+          object.addEventListener('click', () => {
+            const decisionPoint = acts[currentAct].decisionPoints.find(dp => dp.id === obj.id);
+            if (decisionPoint) {
+              presentDecision(decisionPoint);
+            }
+          });
+        }
+
+        container.appendChild(object);
       });
     }
 
-    function gameLoop() {
-      checkEnemyCollision();
+    function presentDecision(decisionPoint) {
+      const dialog = document.createElement("div");
+      dialog.className = "dialog-overlay";
+      let choicesHtml = decisionPoint.choices.map(choice =>
+        `<button class=\"btn choice-btn\" data-outcome=\"${choice.outcome}\" data-consequence=\"${choice.consequenceTextKey}\">${translations[currentLanguage][choice.textKey]}</button>`
+      ).join("");
 
-      if (!isGrounded) velocityY += GRAVITY;
-      playerPosition.y += velocityY;
+      dialog.innerHTML = `
+      <div class=\"dialog-box\">
+        <p>${translations[currentLanguage][decisionPoint.prompt]}</p>
+        <div class=\"btn-group\">
+          ${choicesHtml}
+        </div>
+      </div>
+    `;
+      document.body.appendChild(dialog);
+      currentDialog = dialog; // So closeDialog can find it, though choices will close it
 
-      player.style.left = `${playerPosition.x}px`;
-      player.style.top = `${playerPosition.y}px`;
+      dialog.querySelectorAll(".choice-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          currentActDifficulty = button.dataset.outcome;
+          const consequenceTextKey = button.dataset.consequence;
+          closeDialog(); // Close the decision dialog
+          showDialog(consequenceTextKey); // Show consequence dialog
 
-      requestAnimationFrame(gameLoop);
-
-      checkPlatformCollision();
-
-      if (!isGrounded) {
-        velocityY += GRAVITY;
-      }
-
-      playerPosition.y += velocityY;
-
-      playerPosition.x = Math.max(0, Math.min(window.innerWidth - 40, playerPosition.x));
-
-      player.style.left = `${playerPosition.x}px`;
-      player.style.top = `${playerPosition.y}px`;
-
-      requestAnimationFrame(gameLoop);
+          // Reload the current act with the new difficulty setting
+          // This requires startAct to be able to re-initialize with new difficulty
+          // We might need a slight delay or a more robust way to re-render the act
+          setTimeout(() => {
+            const container = document.getElementById("actContainer");
+            container.innerHTML = ""; // Clear previous act elements
+            startAct(currentAct); // Reload the act, startAct will now use currentActDifficulty
+          }, 2000); // Delay to allow player to read consequence
+        });
+      });
     }
 
-    document.addEventListener('keydown', (e) => {
-      keys[e.key] = true;
-    });
+    function promptRiddle(doorData) {
+      const riddleText = translations[currentLanguage].act2RiddlePrompt + doorData.riddlePrompt;
+      const answer = prompt(riddleText);
+      if (answer && answer.toLowerCase().trim() === doorData.riddleAnswer.toLowerCase().trim()) {
+        showDialog("act2RiddleCorrect");
+        // Unlock the door - this logic will be tied to the door element itself
+        // For now, we can assume the door object in the DOM will be updated or an event triggered
+        const doorElement = document.getElementById(doorData.id);
+        if (doorElement) {
+          doorElement.dataset.locked = "false"; // Mark as unlocked
+          // Potentially change appearance or allow click to proceed
+          alert("DEBUG: Door " + doorData.id + " unlocked by riddle.");
+          // Transition to next act
+          currentAct = doorData.nextAct;
+          startAct(currentAct);
 
-    document.addEventListener('keyup', (e) => {
-      keys[e.key] = false;
-    });
-
-    function handleControls() {
-      if (keys['ArrowLeft'] || keys['a']) playerPosition.x -= MOVE_SPEED;
-      if (keys['ArrowRight'] || keys['d']) playerPosition.x += MOVE_SPEED;
-      if ((keys['ArrowUp'] || keys['w']) && isGrounded) {
-        velocityY = JUMP_FORCE;
-        isGrounded = false;
+        }
+      } else {
+        showDialog("act2RiddleIncorrect");
       }
     }
 
-    setInterval(handleControls, 1000/60);
-    gameLoop();
-  }
+    function initPlayer(container) {
+      const player = document.createElement('div');
+      player.className = 'player';
+      container.appendChild(player);
 
-  function showDialog(textKey, duration = 4000) {
-    const text = translations[currentLanguage][textKey] || textKey;
+      playerPosition = {
+        x: 100,
+        y: 100
+      };
 
-    const dialog = document.createElement('div');
-    dialog.className = 'dialog-overlay';
-    dialog.innerHTML = `
+      function checkObjectCollision() {
+        const playerRect = {
+          x: playerPosition.x,
+          y: playerPosition.y,
+          width: 40,
+          height: 40
+        };
+
+        document.querySelectorAll('.object').forEach(object => {
+          const objRect = object.getBoundingClientRect();
+
+          if (playerRect.x < objRect.x + objRect.width &&
+            playerRect.x + playerRect.width > objRect.x &&
+            playerRect.y < objRect.y + objRect.height &&
+            playerRect.y + playerRect.height > objRect.y) {
+
+            handleObjectCollection(object);
+          }
+        });
+      }
+
+      function gameLoop() {
+        // Update game state based on input and physics
+        if (!isGrounded) {
+          velocityY += GRAVITY;
+        }
+        playerPosition.y += velocityY;
+
+        // Player horizontal position is updated by handleControls
+
+        // Boundary checks for player position
+        playerPosition.x = Math.max(0, Math.min(window.innerWidth - 40, playerPosition.x));
+        if (playerPosition.y > window.innerHeight + 100) { // Allow some off-screen before reset for jumps near top
+          currentHealth = 0;
+          updateHealth();
+          gameOver();
+          return; // Stop this loop iteration to prevent errors after game over
+        }
+        if (playerPosition.y < -100) { // Prevent going too high off-screen
+          playerPosition.y = -100;
+          velocityY = 0;
+        }
+
+        // Collision detection
+        checkPlatformCollision(); // This updates isGrounded and playerPosition.y
+        // checkObjectCollision(); // Assuming click-based interaction for objects as currently implemented
+        checkEnemyCollision(); // Moved from setInterval to gameLoop for better sync
+
+        // Render player
+        const playerElement = document.querySelector(".player");
+        if (playerElement) {
+          playerElement.style.left = `${playerPosition.x}px`;
+          playerElement.style.top = `${playerPosition.y}px`;
+        }
+
+        requestAnimationFrame(gameLoop); // Single call for the main game loop
+      }
+
+      document.addEventListener('keydown', (e) => {
+        keys[e.key] = true;
+      });
+
+      document.addEventListener('keyup', (e) => {
+        keys[e.key] = false;
+      });
+
+      function handleControls() {
+        if (keys['ArrowLeft'] || keys['a']) playerPosition.x -= MOVE_SPEED;
+        if (keys['ArrowRight'] || keys['d']) playerPosition.x += MOVE_SPEED;
+        if ((keys['ArrowUp'] || keys['w']) && isGrounded) {
+          velocityY = JUMP_FORCE;
+          isGrounded = false;
+        }
+      }
+
+      setInterval(handleControls, 1000/60);
+      gameLoop();
+    }
+
+    function showDialog(textKey, duration = 4000, customButtonHandler = null) { // Added customButtonHandler
+      const text = translations[currentLanguage][textKey] || textKey;
+
+      const dialog = document.createElement('div');
+      dialog.className = 'dialog-overlay';
+      dialog.innerHTML = `
       <div class="dialog-box">
         <p>${text}</p>
-        <button class="btn" onclick="closeDialog()">
+        <button class="btn" id="dialogContinueBtn">
           ${translations[currentLanguage].continue}
         </button>
       </div>
     `;
-    document.body.appendChild(dialog);
-    currentDialog = dialog;
-    document.getElementById('skipBtn').style.display = 'block';
+      document.body.appendChild(dialog);
+      currentDialog = dialog;
+      document.getElementById('skipBtn').style.display = 'block';
 
-    if (duration > 0) {
-      setTimeout(closeDialog, duration);
-    }
-  }
-
-  function closeDialog() {
-    if (currentDialog) {
-      currentDialog.remove();
-      currentDialog = null;
-      document.getElementById('skipBtn').style.display = 'none';
-    }
-  }
-
-  function exitGame() {
-    document.body.style.opacity = '0';
-    setTimeout(() => {
-      window.close();
-    }, 500);
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    loadSettings();
-    changeLanguage(currentLanguage);
-
-    document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && document.fullscreenElement) {
-        toggleFullscreen();
+      const continueBtn = dialog.querySelector('#dialogContinueBtn');
+      if (customButtonHandler) {
+        continueBtn.onclick = () => {
+          customButtonHandler();
+        };
+      } else {
+        continueBtn.onclick = closeDialog;
       }
-    });
 
-    document.getElementById('volumeSlider').addEventListener('input', (e) => {
+      // Auto-close logic (currently disabled by previous fix)
+      // if (duration > 0 && !(customButtonHandler)) {
+      //   setTimeout(closeDialog, duration);
+      // }
+    }
+
+    function closeDialog() {
+      if (currentDialog) {
+        currentDialog.remove();
+        currentDialog = null;
+        document.getElementById('skipBtn').style.display = 'none';
+      }
+    }
+
+    function exitGame() {
+      document.body.style.opacity = '0';
+      setTimeout(() => {
+        window.close();  document.addEventListener(\'DOMContentLoaded\
+', () => {
+          loadSettings();
+          changeLanguage(currentLanguage);
+
+          // Main Menu Buttons
+          const playBtn = document.getElementById(\'playBtn\');
+          if (playBtn) playBtn.addEventListener(\'click\', () => showScreen(\'gameScreen\'));
+
+          const settingsBtn = document.getElementById(\'settingsBtn\');
+          if (settingsBtn) settingsBtn.addEventListener(\'click\', () => showScreen(\'settingsScreen\'));
+
+          const exitBtn = document.getElementById(\'exitBtn\');
+          if (exitBtn) exitBtn.addEventListener(\'click\', exitGame);
+
+          // Settings Screen Buttons
+          const saveSettingsBtn = document.getElementById(\'saveSettingsBtn\');
+          if (saveSettingsBtn) saveSettingsBtn.addEventListener(\'click\', saveSettings);
+
+          const backToStartBtn = document.getElementById(\'backToStartBtn\');
+          if (backToStartBtn) backToStartBtn.addEventListener(\'click\', () => showScreen(\'startScreen\'));
+
+          // In-Game Buttons
+          const fullscreenBtn = document.getElementById(\'fullscreenBtn\');
+          if (fullscreenBtn) fullscreenBtn.addEventListener(\'click\', toggleFullscreen);
+
+          const skipBtn = document.getElementById(\'skipBtn\');
+          if (skipBtn) skipBtn.addEventListener(\'click\', closeDialog);
+
+          // Other Event Listeners
+          document.addEventListener(\'keydown\', (e) => {
+          if (e.key === \'Escape\' && document.fullscreenElement) {
+          toggleFullscreen();
+        }
+      });
+
+      const volumeSlider = document.getElementById(\'volumeSlider\');
+      if (volumeSlider) volumeSlider.addEventListener(\'input\', (e) => {
       settings.volume = e.target.value;
+      // Potentially update audio volume immediately if an audio element is playing
     });
-
-    document.getElementById('skipBtn').addEventListener('click', closeDialog);
   });
 </script>
 </body>
