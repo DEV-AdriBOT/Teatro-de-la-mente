@@ -7,7 +7,72 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Nuevos estilos añadidos */
+    /* Nuevos estilos para controles */
+    .controls-screen {
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      color: white;
+      text-align: center;
+    }
+
+    .controls-container {
+      max-width: 600px;
+      padding: 2rem;
+      background: var(--glass-dark);
+      border-radius: var(--border-radius);
+    }
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teatro de la Mente | Neon Dev</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+       /* Nuevos estilos para controles */
+     .controls-screen {
+       background: rgba(0, 0, 0, 0.8);
+       backdrop-filter: blur(10px);
+       color: white;
+       text-align: center;
+     }
+
+    .controls-container {
+      max-width: 600px;
+      padding: 2rem;
+      background: var(--glass-dark);
+      border-radius: var(--border-radius);
+    }
+
+    .controls-list {
+      list-style: none;
+      margin: 2rem 0;
+      text-align: left;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .controls-list li {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 10px;
+      background: var(--glass-light);
+      border-radius: 8px;
+    }
+
+    .key {
+      width: 30px;
+      height: 30px;
+      background: var(--primary);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
     .cube {
       position: absolute;
       width: 35px;
@@ -79,7 +144,7 @@
       50% { transform: scale(1.1); opacity: 0.6; }
       100% { transform: scale(1); opacity: 0.3; }
     }
-    
+
     :root {
       --primary: #4db6ac;
       --primary-light: #80cbc4;
@@ -496,6 +561,35 @@
 <body>
 <div class="scroll-progress"></div>
 
+<div id="controlsScreen" class="screen">
+  <div class="controls-container">
+    <h2 data-i18n="controlsTitle">Controles</h2>
+    <ul class="controls-list">
+      <li>
+        <div class="key">←</div>
+        <span data-i18n="moveLeft">Moverse a la izquierda</span>
+      </li>
+      <li>
+        <div class="key">→</div>
+        <span data-i18n="moveRight">Moverse a la derecha</span>
+      </li>
+      <li>
+        <div class="key">SPACE</div>
+        <span data-i18n="jump">Saltar</span>
+      </li>
+      <li>
+        <div class="key">E</div>
+        <span data-i18n="interact">Interactuar/Recoger objeto</span>
+      </li>
+      <li>
+        <div class="key">ESC</div>
+        <span data-i18n="menu">Menú principal</span>
+      </li>
+    </ul>
+    <button class="btn" onclick="startGame()" data-i18n="startGame">Comenzar Juego</button>
+  </div>
+</div>
+
 <button class="btn fullscreen-btn" id="fullscreenBtn">
   <i class="fas fa-expand"></i>
 </button>
@@ -612,6 +706,17 @@
       memoryFound3: "¡El último fragmento! Ahora recuerdo...",
       memoryFound4: "¡Casi los tengo todos!",
       memoryFound5: "¡Memoria final! ¡Debo escapar!"
+      controlsTitle: "Controles",
+      moveLeft: "Moverse a la izquierda",
+      moveRight: "Moverse a la derecha",
+      jump: "Saltar",
+      interact: "Interactuar/Recoger objeto",
+      menu: "Menú principal",
+      startGame: "Comenzar Juego",
+      cubeCarried: "Cubo recogido! (Presiona E para soltar)",
+      cubeDropped: "Cubo soltado!",
+      cubeOnDoor: "¡Puerta abierta!",
+      deathMessage: "¡Has caído al vacío!"
     },
     en: {
       title: "Theater of the Mind",
@@ -638,6 +743,17 @@
       memoryFound3: "The last fragment! Now I remember...",
       memoryFound4: "Almost got them all!",
       memoryFound5: "Final memory! I must escape!"
+      controlsTitle: "Controls",
+      moveLeft: "Move left",
+      moveRight: "Move right",
+      jump: "Jump",
+      interact: "Interact/Pickup",
+      menu: "Main menu",
+      startGame: "Start Game",
+      cubeCarried: "Cube picked up! (Press E to drop)",
+      cubeDropped: "Cube dropped!",
+      cubeOnDoor: "Door opened!",
+      deathMessage: "You fell into the void!"
     },
     fr: {
       title: "Théâtre de l'Esprit",
@@ -746,6 +862,9 @@
   };
 
   // Variables del juego
+  let currentCube = null;
+  let isCarrying = false;
+  let floorLevel = 600;
   let currentLanguage = 'es';
   let currentAct = 1;
   let playerPosition = { x: 0, y: 0 };
@@ -915,13 +1034,45 @@
       screen.classList.remove('active');
     });
 
-    setTimeout(() => {
-      document.getElementById(screenId).classList.add('active');
+    if(screenId === 'gameScreen') {
+      showScreen('controlsScreen'); // Mostrar controles primero
+      return;
+    }
 
-      if (screenId === 'gameScreen') {
-        startAct(currentAct);
-      }
-    }, 50);
+    document.getElementById(screenId).classList.add('active');
+
+    if (screenId === 'gameScreen') {
+      startAct(currentAct);
+    }
+  }
+  const act = acts[actNumber];
+  showCurtain(translations[currentLanguage][act.name], () => {
+    const container = document.getElementById('actContainer');
+    container.innerHTML = `
+          <div class="health-container" id="healthContainer"></div>
+          ${act.requiredCube ? '<div class="cube-counter">Cubo: 0/1</div>' : ''}
+        `;
+
+    // Crear puerta
+    const door = document.createElement('div');
+    door.className = 'door';
+    door.style.left = `${act.door.x}px`;
+    door.style.top = `${act.door.y}px`;
+    container.appendChild(door);
+
+    // Crear cubo
+    if(act.requiredCube) {
+      const cube = document.createElement('div');
+      cube.className = 'cube';
+      cube.style.left = `${act.objects[0].x}px`;
+      cube.style.top = `${act.objects[0].y}px`;
+      container.appendChild(cube);
+      currentCube = cube;
+    }
+
+    // Resto de inicialización...
+    initPlayer(container);
+  });
   }
 
   function changeLanguage(lang) {
@@ -935,87 +1086,140 @@
   }
 
   function startAct(actNumber) {
-    const acts = {
-      1: {
-        bg: 'act1_background.png',
-        music: 'music_act1.mp3',
-        name: 'act1Title',
-        platforms: [
-          // Starting area
-          { x: 50, y: 550, width: 200, height: 20 },
-          { x: 300, y: 500, width: 150, height: 20, moving: true },
-
-          // Middle section
-          { x: 150, y: 400, width: 120, height: 20 },
-          { x: 550, y: 350, width: 150, height: 20, moving: true },
-
-          // Upper section
-          { x: 200, y: 280, width: 100, height: 20 },
-          { x: 500, y: 220, width: 100, height: 20 },
-
-          // Final section
-          { x: 650, y: 180, width: 150, height: 20 },
-          { x: 450, y: 120, width: 100, height: 20, moving: true },
-          { x: 250, y: 80, width: 150, height: 20 }
-        ],
-        objects: [
-          { x: 100, y: 520, type: 'health' },
-          { x: 350, y: 350, type: 'doubleJump' },
-          // Memory objects
-          { x: 200, y: 370, type: 'memory' },
-          { x: 450, y: 330, type: 'memory' },
-          { x: 600, y: 170, type: 'memory' },
-          { x: 300, y: 230, type: 'memory' },
-          { x: 500, y: 100, type: 'memory' }
-        ],
-        enemies: [
-          { x: 400, y: 450, patrol: 150 },
-          { x: 200, y: 300, patrol: 100 },
-          { x: 600, y: 200, patrol: 120 }
-        ],
-        dialog: "act1Dialog",
-        door: { x: 700, y: 40 }
-      },
-      2: { /* Act 2 configuration */ }
-    };
-
     const act = acts[actNumber];
-    memoriesCollected = 0;
-    totalMemories = act.objects.filter(o => o.type === 'memory').length;
+    currentCube = null;
+    isCarrying = false;
+    pressurePlatesActive = 0;
 
     showCurtain(translations[currentLanguage][act.name], () => {
       const container = document.getElementById('actContainer');
       container.innerHTML = `
         <div class="health-container" id="healthContainer"></div>
-        <div class="memory-counter">${translations[currentLanguage].memoriesCollected} 0/${totalMemories}</div>
+        ${act.requiredCube ? '<div class="cube-counter">Cube: 0/1</div>' : ''}
       `;
 
-      // Create door
+      // Crear puerta
       const door = document.createElement('div');
       door.className = 'door';
       door.style.left = `${act.door.x}px`;
       door.style.top = `${act.door.y}px`;
-      door.onclick = () => {
-        if (memoriesCollected >= requiredMemories) {
-          currentAct = 2;
-          showCurtain(translations[currentLanguage].act2Title, () => {
-            startAct(currentAct);
-          });
-        } else {
-          showDialog('doorRequirement');
-        }
-      };
       container.appendChild(door);
 
+      // Crear elementos específicos del acto
       loadBackground(act.bg, container);
-      playMusic(act.music);
       createPlatforms(act.platforms, container);
       createObjects(act.objects, container);
-      createEnemies(act.enemies, container);
+      if(act.enemies) createEnemies(act.enemies, container);
+      if(act.pressurePlates) createPressurePlates(act.pressurePlates, container);
+      if(act.decisions) createDecisions(act.decisions, container);
+      if(act.spikes) createSpikes(act.spikes, container);
+
       initPlayer(container);
       showDialog(act.dialog);
     });
   }
+
+  function startGame() {
+    currentAct = 1;
+    showScreen('gameScreen');
+  }
+
+  const acts = {
+    1: {
+      bg: 'act1_background.png',
+      music: 'music_act1.mp3',
+      name: 'act1Title',
+      platforms: [
+        { x: 0, y: floorLevel, width: 800, height: 20 },
+        { x: 200, y: 500, width: 150, height: 20, moving: true },
+        { x: 400, y: 400, width: 100, height: 20 },
+        { x: 600, y: 300, width: 200, height: 20, moving: true },
+        { x: 100, y: 200, width: 150, height: 20 }
+      ],
+      objects: [
+        { x: 300, y: floorLevel - 60, type: 'cube' }
+      ],
+      enemies: [
+        { x: 500, y: floorLevel - 40, patrol: 200 }
+      ],
+      dialog: "act1Dialog",
+      door: { x: 700, y: 250 },
+      requiredCube: true
+    },
+    2: {
+      bg: 'act2_background.png',
+      music: 'music_act2.mp3',
+      name: 'act2Title',
+      platforms: [
+        { x: 0, y: floorLevel, width: 200, height: 20 },
+        { x: 300, y: 550, width: 150, height: 20 },
+        { x: 500, y: 500, width: 100, height: 20, moving: true },
+        { x: 200, y: 400, width: 200, height: 20 },
+        { x: 600, y: 300, width: 150, height: 20 }
+      ],
+      objects: [
+        { x: 350, y: 530, type: 'key' },
+        { x: 650, y: 280, type: 'key' }
+      ],
+      pressurePlates: [
+        { x: 700, y: floorLevel - 20, requiredKeys: 2 }
+      ],
+      dialog: "act2Dialog",
+      door: { x: 750, y: 250 }
+    },
+    3: {
+      bg: 'act3_background.png',
+      music: 'music_act3.mp3',
+      name: 'act3Title',
+      platforms: [
+        { x: 0, y: floorLevel, width: 800, height: 20 },
+        { x: 200, y: 500, width: 150, height: 20 },
+        { x: 400, y: 400, width: 150, height: 20, decision: true },
+        { x: 600, y: 300, width: 150, height: 20 }
+      ],
+      dialog: "act3Dialog",
+      door: { x: 700, y: 250 },
+      decisions: [
+        { x: 400, y: 380, effect: 'hard' },
+        { x: 400, y: 350, effect: 'easy' }
+      ]
+    },
+    4: {
+      bg: 'act4_background.png',
+      music: 'music_act4.mp3',
+      name: 'act4Title',
+      platforms: [
+        { x: 0, y: floorLevel, width: 200, height: 20 },
+        { x: 300, y: 500, width: 150, height: 20, speed: 10 },
+        { x: 500, y: 400, width: 150, height: 20, speed: 15 },
+        { x: 200, y: 300, width: 150, height: 20, speed: 20 }
+      ],
+      spikes: [
+        { x: 600, y: floorLevel - 40 },
+        { x: 650, y: floorLevel - 40 }
+      ],
+      dialog: "act4Dialog",
+      door: { x: 700, y: 250 }
+    },
+    5: {
+      bg: 'act5_background.png',
+      music: 'music_act5.mp3',
+      name: 'act5Title',
+      platforms: [
+        { x: 0, y: floorLevel, width: 800, height: 20 },
+        { x: 200, y: 500, width: 150, height: 20 },
+        { x: 400, y: 400, width: 150, height: 20 },
+        { x: 600, y: 300, width: 150, height: 20 }
+      ],
+      puzzles: [
+        { x: 300, y: 480, type: 'memory' },
+        { x: 500, y: 380, type: 'memory' }
+      ],
+      dialog: "act5Dialog",
+      door: { x: 700, y: 250 }
+    }
+  };
+
 
   function createPlatforms(platforms, container) {
     platforms.forEach(plat => {
@@ -1147,14 +1351,1563 @@
     gameLoop();
   }
 
+  function handleCubeInteraction() {
+    if (!currentCube) return;
+
+    const cubeRect = currentCube.getBoundingClientRect();
+    const playerRect = {
+      x: playerPosition.x,
+      y: playerPosition.y,
+      width: 40,
+      height: 40
+    };
+
+    // Verificar proximidad
+    if (Math.abs(playerRect.x - cubeRect.x) < 50 &&
+      Math.abs(playerRect.y - cubeRect.y) < 50) {
+      if (!isCarrying) {
+        isCarrying = true;
+        currentCube.classList.add('carried');
+      } else {
+        isCarrying = false;
+        currentCube.classList.remove('carried');
+        currentCube.style.left = `${playerPosition.x}px`;
+        currentCube.style.top = `${playerPosition.y}px`;
+        checkCubeOnDoor();
+      }
+    }
+  }
+
+  function checkCubeOnDoor() {
+    const cube = document.querySelector('.cube');
+    const door = document.querySelector('.door');
+
+    if (cube && door) {
+      const cubeRect = cube.getBoundingClientRect();
+      const doorRect = door.getBoundingClientRect();
+
+      if (cubeRect.x > doorRect.x - 30 && cubeRect.x < doorRect.x + 30 &&
+        cubeRect.y > doorRect.y - 30 && cubeRect.y < doorRect.y + 30) {
+        nextAct();
+      }
+    }
+  }
+
+  function handleDecision(effect) {
+    if (effect === 'hard') {
+      enemySpeed *= 1.5;
+      showDialog('decisionHard');
+    } else {
+      enemySpeed *= 0.75;
+      showDialog('decisionEasy');
+    }
+  }
+
+  function createSpikes(spikes, container) {
+    spikes.forEach(spike => {
+      const spikeElement = document.createElement('div');
+      spikeElement.className = 'moving-spike';
+      spikeElement.style.left = `${spike.x}px`;
+      spikeElement.style.top = `${spike.y}px`;
+      container.appendChild(spikeElement);
+    });
+  }
+
   function handleControls() {
     const speed = MOVE_SPEED;
     if (keys['ArrowLeft'] || keys['a']) playerPosition.x -= speed;
     if (keys['ArrowRight'] || keys['d']) playerPosition.x += speed;
-    if ((keys['ArrowUp'] || keys['w'] || keys['Space']) && isGrounded) {
+    if ((keys['ArrowUp'] || keys['w'] || keys[' ']) && isGrounded) {
       velocityY = JUMP_FORCE;
       isGrounded = false;
     }
+    if (keys['e']) handleCubeInteraction();
+  }
+
+  function gameLoop() {
+    checkPlatformCollision();
+    checkEnemyCollision();
+    checkObjectCollision();
+
+    handleControls();
+
+    if (!isGrounded) velocityY += GRAVITY;
+    playerPosition.y += velocityY;
+
+    playerPosition.x = Math.max(0, Math.min(window.innerWidth - 40, playerPosition.x));
+
+    const player = document.querySelector('.player');
+    if (player) {
+      player.style.left = `${playerPosition.x}px`;
+      player.style.top = `${playerPosition.y}px`;
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  function showDialog(textKey, duration = 4000) {
+    closeDialog(); // Cerrar cualquier diálogo existente
+
+    const text = translations[currentLanguage][textKey] || textKey;
+
+    const dialog = document.createElement('div');
+    dialog.className = 'dialog-overlay';
+    dialog.innerHTML = `
+      <div class="dialog-box">
+        <p>${text}</p>
+        <button class="btn" onclick="closeDialog()">
+          ${translations[currentLanguage].continue}
+        </button>
+      </div>
+    `;
+    document.body.appendChild(dialog);
+    currentDialog = dialog;
+    document.getElementById('skipBtn').style.display = 'block';
+
+    if (duration > 0) {
+      setTimeout(closeDialog, duration);
+    }
+  }
+
+  function closeDialog() {
+    if (currentDialog) {
+      currentDialog.remove();
+      currentDialog = null;
+      document.getElementById('skipBtn').style.display = 'none';
+    }
+  }
+
+  function gameOver() {
+    alert(translations[currentLanguage]['continue']);
+    currentAct = 1;
+    showScreen('startScreen');
+  }
+
+  function exitGame() {
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+      window.close();
+    }, 500);
+  }
+
+  // Initialize the game
+  document.addEventListener('DOMContentLoaded', () => {
+    loadSettings();
+    changeLanguage(currentLanguage);
+
+    document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+    document.getElementById('skipBtn').addEventListener('click', closeDialog);
+
+    // Make sure fullscreen button stays on top
+    document.getElementById('fullscreenBtn').style.zIndex = '1001';
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.fullscreenElement) {
+        toggleFullscreen();
+      }
+    });
+
+    document.getElementById('volumeSlider').addEventListener('input', (e) => {
+      settings.volume = e.target.value;
+    });
+  });
+
+  // Hacer funciones accesibles globalmente
+  window.showScreen = showScreen;
+  window.changeLanguage = changeLanguage;
+  window.saveSettings = saveSettings;
+  window.exitGame = exitGame;
+  window.closeDialog = closeDialog;
+</script>
+</body>
+</html>
+
+    .controls-list {
+      list-style: none;
+      margin: 2rem 0;
+      text-align: left;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .controls-list li {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 10px;
+      background: var(--glass-light);
+      border-radius: 8px;
+    }
+
+    .key {
+      width: 30px;
+      height: 30px;
+      background: var(--primary);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .cube {
+      position: absolute;
+      width: 35px;
+      height: 35px;
+      background: #FFD700;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      z-index: 3;
+    }
+
+    .cube.carried {
+      transform: scale(0.8);
+      filter: brightness(1.2);
+    }
+
+    .pressure-plate {
+      position: absolute;
+      width: 60px;
+      height: 20px;
+      background: #607D8B;
+      border-radius: 4px 4px 0 0;
+      z-index: 2;
+    }
+
+    .activated {
+      background: #4CAF50 !important;
+    }
+
+    .spike-wall {
+      position: absolute;
+      width: 40px;
+      height: 100%;
+      background: repeating-linear-gradient(
+        45deg,
+        #d32f2f,
+        #d32f2f 10px,
+        #b71c1c 10px,
+        #b71c1c 20px
+      );
+    }
+
+    .moving-spike {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: #d32f2f;
+      clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+      animation: moveSpike 2s infinite linear;
+    }
+
+    @keyframes moveSpike {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(200px); }
+      100% { transform: translateX(0); }
+    }
+
+    .decision-point {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 235, 59, 0.3);
+      border-radius: 50%;
+      animation: pulseDecision 2s infinite;
+    }
+
+    @keyframes pulseDecision {
+      0% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.1); opacity: 0.6; }
+      100% { transform: scale(1); opacity: 0.3; }
+    }
+
+    :root {
+      --primary: #4db6ac;
+      --primary-light: #80cbc4;
+      --primary-dark: #00897b;
+      --secondary: #80deea;
+      --secondary-dark: #4dd0e1;
+      --accent: #e0f7fa;
+      --dark: #263238;
+      --light: #ffffff;
+      --text: #eceff1;
+      --text-dark: #455a64;
+      --glass-light: rgba(255, 255, 255, 0.1);
+      --glass-dark: rgba(0, 0, 0, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --font-body: 'Inter', sans-serif;
+      --border-radius: 16px;
+      --navy: #003366;
+      --turquoise: #00c8c8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--text-dark);
+      background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 4px;
+      background: var(--primary);
+      z-index: 1000;
+      transition: width 0.1s linear;
+    }
+
+    .screen {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .active {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 1;
+    }
+
+    #startScreen {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .game-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .game-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, var(--primary), var(--turquoise));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .game-subtitle {
+      font-size: 1.2rem;
+      color: var(--text-dark);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: var(--light);
+      padding: 15px 30px;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(77, 182, 172, 0.3);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 200px;
+      justify-content: center;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(77, 182, 172, 0.4);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--primary-dark);
+      border: 2px solid var(--primary);
+    }
+
+    .btn-outline:hover {
+      background: rgba(77, 182, 172, 0.1);
+    }
+
+    .settings-container {
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(5px);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    }
+
+    .settings-title {
+      font-size: 2rem;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .language-selector {
+      position: relative;
+      width: 100%;
+    }
+
+    .language-selector select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.3);
+      color: var(--text-dark);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .language-selector::after {
+      content: '\f078';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--primary-dark);
+    }
+
+    .volume-slider {
+      width: 100%;
+      height: 8px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+    }
+
+    .curtain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #1a1a2e, #16213e);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .curtain.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .curtain-text {
+      color: white;
+      font-size: 3rem;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5rem;
+    }
+
+    /* Fix fullscreen button positioning */
+    .fullscreen-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: var(--glass-light);
+      backdrop-filter: blur(5px);
+      border: 1px solid var(--glass-border);
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Enemy improvements */
+    .enemy {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: #d32f2f;
+      border-radius: 8px;
+      z-index: 2;
+    }
+
+    /* Spike improvements */
+    .spike {
+      position: absolute;
+      width: 30px;
+      height: 15px;
+      background: #d32f2f;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      z-index: 2;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* Additional platform styling */
+    .platform {
+      position: absolute;
+      background: #4db6ac;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 1;
+      border: 2px solid var(--primary-dark);
+    }
+
+    .skip-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .player {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      position: absolute;
+      border-radius: 8px;
+      transition: left 0.1s, top 0.1s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 2;
+    }
+
+    .object {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: #ff4081;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      z-index: 3;
+      cursor: pointer;
+    }
+
+    .health-container {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      gap: 5px;
+      z-index: 1000;
+    }
+
+    .health-unit {
+      width: 30px;
+      height: 30px;
+      background: #d32f2f;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .door {
+      position: absolute;
+      width: 60px;
+      height: 80px;
+      background: #4db6ac;
+      border: 3px solid var(--primary-dark);
+      border-radius: 8px;
+      z-index: 4;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .door:hover {
+      transform: scale(1.05);
+    }
+
+    .dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+    }
+
+    .dialog-box {
+      background: var(--light);
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      max-width: 500px;
+      text-align: center;
+    }
+
+    .memory-counter {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--glass-light);
+      padding: 10px 20px;
+      border-radius: var(--border-radius);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+    }
+
+    .moving-platform {
+      background: #4db6ac !important;
+      animation: movePlatform 4s infinite alternate;
+    }
+
+    @keyframes movePlatform {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(100px); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @media (max-width: 768px) {
+      .game-title {
+        font-size: 2.5rem;
+      }
+
+      .btn-group {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="scroll-progress"></div>
+
+<div id="controlsScreen" class="screen">
+  <div class="controls-container">
+    <h2 data-i18n="controlsTitle">Controles</h2>
+    <ul class="controls-list">
+      <li>
+        <div class="key">←</div>
+        <span data-i18n="moveLeft">Moverse a la izquierda</span>
+      </li>
+      <li>
+        <div class="key">→</div>
+        <span data-i18n="moveRight">Moverse a la derecha</span>
+      </li>
+      <li>
+        <div class="key">SPACE</div>
+        <span data-i18n="jump">Saltar</span>
+      </li>
+      <li>
+        <div class="key">E</div>
+        <span data-i18n="interact">Interactuar/Recoger objeto</span>
+      </li>
+      <li>
+        <div class="key">ESC</div>
+        <span data-i18n="menu">Menú principal</span>
+      </li>
+    </ul>
+    <button class="btn" onclick="startGame()" data-i18n="startGame">Comenzar Juego</button>
+  </div>
+</div>
+
+<button class="btn fullscreen-btn" id="fullscreenBtn">
+  <i class="fas fa-expand"></i>
+</button>
+
+<button class="btn skip-btn" id="skipBtn" style="display: none;">
+  <i class="fas fa-forward"></i>
+  <span data-i18n="skip">Saltar</span>
+</button>
+
+<div id="startScreen" class="screen active">
+  <div class="game-header slide-up">
+    <h1 class="game-title" data-i18n="title">Teatro de la Mente</h1>
+    <p class="game-subtitle" data-i18n="subtitle">Un viaje psicológico a través de cinco actos emocionales</p>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn" onclick="showScreen('gameScreen')">
+      <i class="fas fa-play"></i>
+      <span data-i18n="play">Jugar</span>
+    </button>
+    <button class="btn btn-outline" onclick="showScreen('settingsScreen')">
+      <i class="fas fa-cog"></i>
+      <span data-i18n="settings">Ajustes</span>
+    </button>
+    <button class="btn btn-outline" onclick="exitGame()">
+      <i class="fas fa-sign-out-alt"></i>
+      <span data-i18n="exit">Salir</span>
+    </button>
+  </div>
+</div>
+
+<div id="settingsScreen" class="screen">
+  <div class="settings-container fade-in">
+    <h2 class="settings-title" data-i18n="settings">Ajustes</h2>
+
+    <div class="settings-group">
+      <label class="settings-label" data-i18n="language">Idioma</label>
+      <div class="language-selector">
+        <select id="language" onchange="changeLanguage(this.value)">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="it">Italiano</option>
+          <option value="pt">Português</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <label class="settings-label" data-i18n="volume">Volumen</label>
+      <div class="volume-control">
+        <input type="range" min="0" max="100" value="70" class="volume-slider" id="volumeSlider">
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <label class="settings-label" data-i18n="subtitles">Subtítulos</label>
+      <div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="subtitlesToggle" checked>
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label" data-i18n="subtitlesOption">Activar/Desactivar</span>
+      </div>
+    </div>
+
+    <div class="btn-group" style="margin-top: 2rem;">
+      <button class="btn" onclick="saveSettings()">
+        <i class="fas fa-save"></i>
+        <span data-i18n="save">Guardar</span>
+      </button>
+      <button class="btn btn-outline" onclick="showScreen('startScreen')">
+        <i class="fas fa-arrow-left"></i>
+        <span data-i18n="back">Volver</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="gameScreen" class="screen">
+  <div id="actContainer"></div>
+</div>
+
+<div class="curtain" id="curtain">
+  <div class="curtain-text" data-i18n="theEnd">FIN</div>
+  <button class="btn" onclick="showScreen('startScreen')" data-i18n="returnMenu">Volver al menú</button>
+</div>
+
+<script>
+  const translations = {
+    es: {
+      title: "Teatro de la Mente",
+      subtitle: "Un viaje psicológico a través de cinco actos emocionales",
+      play: "Jugar",
+      settings: "Ajustes",
+      exit: "Salir",
+      back: "Volver",
+      save: "Guardar",
+      language: "Idioma",
+      volume: "Volumen",
+      subtitles: "Subtítulos",
+      subtitlesOption: "Activar/Desactivar",
+      theEnd: "FIN",
+      returnMenu: "Volver al menú",
+      skip: "Saltar",
+      continue: "Continuar",
+      act1Title: "Acto I: El Olvido",
+      act1Dialog: "¿Dónde estoy...? Estos seres... parecen alimentarse de mis recuerdos.",
+      memoriesCollected: "Recuerdos encontrados: ",
+      doorRequirement: "¡Necesitas encontrar todos los recuerdos!",
+      memoryFound1: "¡Un recuerdo fragmentado!",
+      memoryFound2: "¡Otro pedazo de mi pasado!",
+      memoryFound3: "¡El último fragmento! Ahora recuerdo...",
+      memoryFound4: "¡Casi los tengo todos!",
+      memoryFound5: "¡Memoria final! ¡Debo escapar!",
+      controlsTitle: "Controles",
+      moveLeft: "Moverse a la izquierda",
+      moveRight: "Moverse a la derecha",
+      jump: "Saltar",
+      interact: "Interactuar/Recoger objeto",
+      menu: "Menú principal",
+      startGame: "Comenzar Juego",
+      cubeCarried: "Cubo recogido! (Presiona E para soltar)",
+      cubeDropped: "Cubo soltado!",
+      cubeOnDoor: "¡Puerta abierta!",
+      deathMessage: "¡Has caído al vacío!"
+    },
+    en: {
+      title: "Theater of the Mind",
+      subtitle: "A psychological journey through five emotional acts",
+      play: "Play",
+      settings: "Settings",
+      exit: "Exit",
+      back: "Back",
+      save: "Save",
+      language: "Language",
+      volume: "Volume",
+      subtitles: "Subtitles",
+      subtitlesOption: "Enable/Disable",
+      theEnd: "THE END",
+      returnMenu: "Return to menu",
+      skip: "Skip",
+      continue: "Continue",
+      act1Title: "Act I: The Oblivion",
+      act1Dialog: "Where am I...? These creatures... they seem to feed on my memories.",
+      memoriesCollected: "Memories found: ",
+      doorRequirement: "You need to find all memories!",
+      memoryFound1: "A fragmented memory!",
+      memoryFound2: "Another piece of my past!",
+      memoryFound3: "The last fragment! Now I remember...",
+      memoryFound4: "Almost got them all!",
+      memoryFound5: "Final memory! I must escape!"
+      controlsTitle: "Controls",
+      moveLeft: "Move left",
+      moveRight: "Move right",
+      jump: "Jump",
+      interact: "Interact/Pickup",
+      menu: "Main menu",
+      startGame: "Start Game",
+      cubeCarried: "Cube picked up! (Press E to drop)",
+      cubeDropped: "Cube dropped!",
+      cubeOnDoor: "Door opened!",
+      deathMessage: "You fell into the void!"
+    },
+    fr: {
+      title: "Théâtre de l'Esprit",
+      subtitle: "Un voyage psychologique à travers cinq actes émotionnels",
+      play: "Jouer",
+      settings: "Paramètres,",
+      exit: "Quitter",
+      back: "Retour",
+      save: "Sauvegarder",
+      language: "Langue",
+      volume: "Volume",
+      subtitles: "Sous-titres",
+      subtitlesOption: "Activer/Désactiver",
+      theEnd: "FIN",
+      returnMenu: "Retour au menu",
+      skip: "Passer",
+      continue: "Continuer",
+      act1Title: "Acte I: L'Oubli",
+      act1Dialog: "Où suis-je...? Ces créatures... elles semblent se nourrir de mes souvenirs.",
+      memoriesCollected: "Souvenirs trouvés: ",
+      doorRequirement: "Vous devez trouver tous les souvenirs!",
+      memoryFound1: "Un souvenir fragmenté!",
+      memoryFound2: "Un autre morceau de mon passé!",
+      memoryFound3: "Le dernier fragment! Maintenant je me souviens...",
+      memoryFound4: "Je les ai presque tous!",
+      memoryFound5: "Dernier souvenir! Je dois m'échapper!"
+    },
+    de: {
+      title: "Theater des Geistes",
+      subtitle: "Eine psychologische Reise durch fünf emotionale Akte",
+      play: "Spielen",
+      settings: "Einstellungen",
+      exit: "Beenden",
+      back: "Zurück",
+      save: "Speichern",
+      language: "Sprache",
+      volume: "Lautstärke",
+      subtitles: "Untertitel",
+      subtitlesOption: "Aktivieren/Deaktivieren",
+      theEnd: "ENDE",
+      returnMenu: "Zurück zum Menü",
+      skip: "Überspringen",
+      continue: "Fortsetzen",
+      act1Title: "Akt I: Die Vergessenheit",
+      act1Dialog: "Wo bin ich...? Diese Kreaturen... sie scheinen sich von meinen Erinnerungen zu ernähren.",
+      memoriesCollected: "Erinnerungen gefunden: ",
+      doorRequirement: "Du musst alle Erinnerungen finden!",
+      memoryFound1: "Eine fragmentierte Erinnerung!",
+      memoryFound2: "Ein weiteres Stück meiner Vergangenheit!",
+      memoryFound3: "Das letzte Fragment! Jetzt erinnere ich mich...",
+      memoryFound4: "Fast alle zusammen!",
+      memoryFound5: "Letzte Erinnerung! Ich muss entkommen!"
+    },
+    it: {
+      title: "Teatro della Mente",
+      subtitle: "Un viaggio psicologico attraverso cinque atti emotivi",
+      play: "Giocare",
+      settings: "Impostazioni",
+      exit: "Uscita",
+      back: "Indietro",
+      save: "Salva",
+      language: "Lingua",
+      volume: "Volume",
+      subtitles: "Sottotitoli",
+      subtitlesOption: "Attivare/Disattivare",
+      theEnd: "FINE",
+      returnMenu: "Torna al menu",
+      skip: "Saltare",
+      continue: "Continua",
+      act1Title: "Atto I: L'Oblio",
+      act1Dialog: "Dove sono...? Queste creature... sembrano nutrirsi dei miei ricordi.",
+      memoriesCollected: "Ricordi trovati: ",
+      doorRequirement: "Devi trovare tutti i ricordi!",
+      memoryFound1: "Un ricordo frammentato!",
+      memoryFound2: "Un altro pezzo del mio passato!",
+      memoryFound3: "L'ultimo frammento! Ora ricordo...",
+      memoryFound4: "Li ho quasi tutti!",
+      memoryFound5: "Ultimo ricordo! Devo scappare!"
+    },
+    pt: {
+      title: "Teatro da Mente",
+      subtitle: "Uma jornada psicológica através de cinco atos emocionais",
+      play: "Jogar",
+      settings: "Configurações",
+      exit: "Sair",
+      back: "Voltar",
+      save: "Salvar",
+      language: "Idioma",
+      volume: "Volume",
+      subtitles: "Legendas",
+      subtitlesOption: "Ativar/Desativar",
+      theEnd: "FIM",
+      returnMenu: "Voltar ao menu",
+      skip: "Pular",
+      continue: "Continuar",
+      act1Title: "Ato I: O Esquecimento",
+      act1Dialog: "Onde estou...? Essas criaturas... parecem se alimentar de minhas memórias.",
+      memoriesCollected: "Memórias encontradas: ",
+      doorRequirement: "Você precisa encontrar todas as memórias!",
+      memoryFound1: "Uma memória fragmentada!",
+      memoryFound2: "Outro pedaço do meu passado!",
+      memoryFound3: "O último fragmento! Agora eu me lembro...",
+      memoryFound4: "Quase todas elas!",
+      memoryFound5: "Memória final! Eu preciso escapar!"
+    }
+  };
+
+  // Variables del juego
+  let currentCube = null;
+  let isCarrying = false;
+  let floorLevel = 600;
+  let currentLanguage = 'es';
+  let currentAct = 1;
+  let playerPosition = { x: 0, y: 0 };
+  let settings = {
+    volume: 70,
+    subtitles: true
+  };
+  let currentDialog = null;
+  let velocityY = 0;
+  let GRAVITY = 0.6;
+  let JUMP_FORCE = -14;
+  let MOVE_SPEED = 8;
+  let currentHealth = 100;
+  let isGrounded = false;
+  let keys = {};
+  let memoriesCollected = 0;
+  let totalMemories = 0;
+  let requiredMemories = 5;
+  let enemySpeed = 3;
+
+  function nextAct() {
+    currentAct++;
+    if (currentAct > 5) {
+      showScreen('curtain');
+    } else {
+      startAct(currentAct);
+    }
+  }
+
+  function updateHealth() {
+    const container = document.getElementById('healthContainer');
+    if (!container) return;
+
+    container.innerHTML = '';
+    for (let i = 0; i < Math.ceil(currentHealth / 20); i++) {
+      const unit = document.createElement('div');
+      unit.className = 'health-unit';
+      container.appendChild(unit);
+    }
+  }
+
+  function checkPlatformCollision() {
+    const playerRect = {
+      x: playerPosition.x,
+      y: playerPosition.y,
+      width: 40,
+      height: 40
+    };
+
+    isGrounded = false;
+
+    document.querySelectorAll('.platform').forEach(platform => {
+      const platRect = platform.getBoundingClientRect();
+
+      if (playerRect.x < platRect.x + platRect.width &&
+        playerRect.x + playerRect.width > platRect.x &&
+        playerRect.y + playerRect.height >= platRect.y &&
+        playerRect.y < platRect.y + platRect.height) {
+
+        if (velocityY > 0) {
+          playerPosition.y = platRect.y - playerRect.height;
+          velocityY = 0;
+          isGrounded = true;
+        }
+      }
+    });
+  }
+
+  function checkEnemyCollision() {
+    const playerRect = {
+      x: playerPosition.x,
+      y: playerPosition.y,
+      width: 40,
+      height: 40
+    };
+
+    document.querySelectorAll('.enemy').forEach(enemy => {
+      const enemyRect = enemy.getBoundingClientRect();
+
+      // Colisión vertical (pisar enemigo)
+      if (playerRect.y + playerRect.height < enemyRect.y + 10 &&
+        playerRect.y + playerRect.height > enemyRect.y - 10 &&
+        playerRect.x + playerRect.width > enemyRect.x &&
+        playerRect.x < enemyRect.x + enemyRect.width) {
+
+        enemy.remove();
+        velocityY = JUMP_FORCE * 0.8;
+      }
+      // Colisión lateral (daño al jugador)
+      else if (playerRect.x < enemyRect.x + enemyRect.width &&
+        playerRect.x + playerRect.width > enemyRect.x &&
+        playerRect.y < enemyRect.y + enemyRect.height &&
+        playerRect.y + playerRect.height > enemyRect.y) {
+
+        currentHealth -= 20;
+        updateHealth();
+        if (currentHealth <= 0) gameOver();
+      }
+    });
+  }
+
+  function checkObjectCollision() {
+    const playerRect = {
+      x: playerPosition.x,
+      y: playerPosition.y,
+      width: 40,
+      height: 40
+    };
+
+    document.querySelectorAll('.object').forEach(object => {
+      const objRect = object.getBoundingClientRect();
+
+      if (playerRect.x < objRect.x + objRect.width &&
+        playerRect.x + playerRect.width > objRect.x &&
+        playerRect.y < objRect.y + objRect.height &&
+        playerRect.y + playerRect.height > objRect.y) {
+
+        handleObjectCollection(object);
+      }
+    });
+  }
+
+  function handleObjectCollection(object) {
+    const type = object.dataset.type;
+
+    if (type === 'health') {
+      currentHealth = Math.min(100, currentHealth + 20);
+      updateHealth();
+    }
+    else if (type === 'doubleJump') {
+      GRAVITY = 0.3;
+      setTimeout(() => GRAVITY = 0.6, 10000);
+    }
+    else if (type === 'memory') {
+      memoriesCollected++;
+      document.querySelector('.memory-counter').textContent =
+        `${translations[currentLanguage].memoriesCollected} ${memoriesCollected}/${totalMemories}`;
+      showDialog(`memoryFound${memoriesCollected}`);
+    }
+
+    object.remove();
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error('Error al intentar pantalla completa:', err);
+      });
+      document.getElementById('fullscreenBtn').innerHTML = '<i class="fas fa-compress"></i>';
+    } else {
+      document.exitFullscreen();
+      document.getElementById('fullscreenBtn').innerHTML = '<i class="fas fa-expand"></i>';
+    }
+  }
+
+  function loadSettings() {
+    const savedSettings = localStorage.getItem('theaterOfMindSettings');
+    if (savedSettings) {
+      settings = JSON.parse(savedSettings);
+      document.getElementById('volumeSlider').value = settings.volume;
+      document.getElementById('subtitlesToggle').checked = settings.subtitles;
+    }
+  }
+
+  function saveSettings() {
+    settings.volume = document.getElementById('volumeSlider').value;
+    settings.subtitles = document.getElementById('subtitlesToggle').checked;
+
+    localStorage.setItem('theaterOfMindSettings', JSON.stringify(settings));
+    showScreen('startScreen');
+    alert(translations[currentLanguage]['save'] + ' ✓');
+  }
+
+  function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => {
+      screen.classList.remove('active');
+    });
+
+    if(screenId === 'gameScreen') {
+      showScreen('controlsScreen'); // Mostrar controles primero
+      return;
+    }
+
+    document.getElementById(screenId).classList.add('active');
+
+    if (screenId === 'gameScreen') {
+      startAct(currentAct);
+    }
+  }
+  const act = acts[actNumber];
+  showCurtain(translations[currentLanguage][act.name], () => {
+    const container = document.getElementById('actContainer');
+    container.innerHTML = `
+          <div class="health-container" id="healthContainer"></div>
+          ${act.requiredCube ? '<div class="cube-counter">Cubo: 0/1</div>' : ''}
+        `;
+
+    // Crear puerta
+    const door = document.createElement('div');
+    door.className = 'door';
+    door.style.left = `${act.door.x}px`;
+    door.style.top = `${act.door.y}px`;
+    container.appendChild(door);
+
+    // Crear cubo
+    if(act.requiredCube) {
+      const cube = document.createElement('div');
+      cube.className = 'cube';
+      cube.style.left = `${act.objects[0].x}px`;
+      cube.style.top = `${act.objects[0].y}px`;
+      container.appendChild(cube);
+      currentCube = cube;
+    }
+
+    // Resto de inicialización...
+    initPlayer(container);
+  });
+  }
+
+  function changeLanguage(lang) {
+    currentLanguage = lang;
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+      const key = element.getAttribute('data-i18n');
+      if (translations[lang] && translations[lang][key]) {
+        element.textContent = translations[lang][key];
+      }
+    });
+  }
+
+  function startAct(actNumber) {
+    const act = acts[actNumber];
+    currentCube = null;
+    isCarrying = false;
+    pressurePlatesActive = 0;
+
+    showCurtain(translations[currentLanguage][act.name], () => {
+      const container = document.getElementById('actContainer');
+      container.innerHTML = `
+        <div class="health-container" id="healthContainer"></div>
+        ${act.requiredCube ? '<div class="cube-counter">Cube: 0/1</div>' : ''}
+      `;
+
+      // Crear puerta
+      const door = document.createElement('div');
+      door.className = 'door';
+      door.style.left = `${act.door.x}px`;
+      door.style.top = `${act.door.y}px`;
+      container.appendChild(door);
+
+      // Crear elementos específicos del acto
+      loadBackground(act.bg, container);
+      createPlatforms(act.platforms, container);
+      createObjects(act.objects, container);
+      if(act.enemies) createEnemies(act.enemies, container);
+      if(act.pressurePlates) createPressurePlates(act.pressurePlates, container);
+      if(act.decisions) createDecisions(act.decisions, container);
+      if(act.spikes) createSpikes(act.spikes, container);
+
+      initPlayer(container);
+      showDialog(act.dialog);
+    });
+  }
+
+  function startGame() {
+    currentAct = 1;
+    showScreen('gameScreen');
+  }
+
+  const acts = {
+    1: {
+      bg: 'act1_background.png',
+      music: 'music_act1.mp3',
+      name: 'act1Title',
+      platforms: [
+        { x: 0, y: floorLevel, width: 800, height: 20 },
+        { x: 200, y: 500, width: 150, height: 20, moving: true },
+        { x: 400, y: 400, width: 100, height: 20 },
+        { x: 600, y: 300, width: 200, height: 20, moving: true },
+        { x: 100, y: 200, width: 150, height: 20 }
+      ],
+      objects: [
+        { x: 300, y: floorLevel - 60, type: 'cube' }
+      ],
+      enemies: [
+        { x: 500, y: floorLevel - 40, patrol: 200 }
+      ],
+      dialog: "act1Dialog",
+      door: { x: 700, y: 250 },
+      requiredCube: true
+    },
+    2: {
+      bg: 'act2_background.png',
+      music: 'music_act2.mp3',
+      name: 'act2Title',
+      platforms: [
+        { x: 0, y: floorLevel, width: 200, height: 20 },
+        { x: 300, y: 550, width: 150, height: 20 },
+        { x: 500, y: 500, width: 100, height: 20, moving: true },
+        { x: 200, y: 400, width: 200, height: 20 },
+        { x: 600, y: 300, width: 150, height: 20 }
+      ],
+      objects: [
+        { x: 350, y: 530, type: 'key' },
+        { x: 650, y: 280, type: 'key' }
+      ],
+      pressurePlates: [
+        { x: 700, y: floorLevel - 20, requiredKeys: 2 }
+      ],
+      dialog: "act2Dialog",
+      door: { x: 750, y: 250 }
+    },
+    3: {
+      bg: 'act3_background.png',
+      music: 'music_act3.mp3',
+      name: 'act3Title',
+      platforms: [
+        { x: 0, y: floorLevel, width: 800, height: 20 },
+        { x: 200, y: 500, width: 150, height: 20 },
+        { x: 400, y: 400, width: 150, height: 20, decision: true },
+        { x: 600, y: 300, width: 150, height: 20 }
+      ],
+      dialog: "act3Dialog",
+      door: { x: 700, y: 250 },
+      decisions: [
+        { x: 400, y: 380, effect: 'hard' },
+        { x: 400, y: 350, effect: 'easy' }
+      ]
+    },
+    4: {
+      bg: 'act4_background.png',
+      music: 'music_act4.mp3',
+      name: 'act4Title',
+      platforms: [
+        { x: 0, y: floorLevel, width: 200, height: 20 },
+        { x: 300, y: 500, width: 150, height: 20, speed: 10 },
+        { x: 500, y: 400, width: 150, height: 20, speed: 15 },
+        { x: 200, y: 300, width: 150, height: 20, speed: 20 }
+      ],
+      spikes: [
+        { x: 600, y: floorLevel - 40 },
+        { x: 650, y: floorLevel - 40 }
+      ],
+      dialog: "act4Dialog",
+      door: { x: 700, y: 250 }
+    },
+    5: {
+      bg: 'act5_background.png',
+      music: 'music_act5.mp3',
+      name: 'act5Title',
+      platforms: [
+        { x: 0, y: floorLevel, width: 800, height: 20 },
+        { x: 200, y: 500, width: 150, height: 20 },
+        { x: 400, y: 400, width: 150, height: 20 },
+        { x: 600, y: 300, width: 150, height: 20 }
+      ],
+      puzzles: [
+        { x: 300, y: 480, type: 'memory' },
+        { x: 500, y: 380, type: 'memory' }
+      ],
+      dialog: "act5Dialog",
+      door: { x: 700, y: 250 }
+    }
+  };
+
+
+  function createPlatforms(platforms, container) {
+    platforms.forEach(plat => {
+      const platform = document.createElement('div');
+      platform.className = `platform ${plat.moving ? 'moving-platform' : ''}`;
+      platform.style.width = `${plat.width}px`;
+      platform.style.height = `${plat.height}px`;
+      platform.style.left = `${plat.x}px`;
+      platform.style.top = `${plat.y}px`;
+
+      if (plat.moving) {
+        platform.style.animationDuration = `${Math.random() * 3 + 2}s`;
+      }
+
+      container.appendChild(platform);
+    });
+  }
+
+  function createEnemies(enemies, container) {
+    enemies.forEach(enemy => {
+      const enemyElement = document.createElement('div');
+      enemyElement.className = 'enemy';
+      enemyElement.style.left = `${enemy.x}px`;
+      enemyElement.style.top = `${enemy.y}px`;
+      container.appendChild(enemyElement);
+
+      let direction = 1;
+      const moveInterval = setInterval(() => {
+        if (!enemyElement.parentElement) {
+          clearInterval(moveInterval);
+          return;
+        }
+
+        const currentLeft = parseInt(enemyElement.style.left) || 0;
+        if (currentLeft > enemy.x + enemy.patrol || currentLeft < enemy.x - enemy.patrol) {
+          direction *= -1;
+        }
+        enemyElement.style.left = `${currentLeft + (direction * 2)}px`;
+      }, 50);
+    });
+  }
+
+  function showCurtain(actName, callback) {
+    const curtain = document.getElementById('curtain');
+    const curtainText = curtain.querySelector('.curtain-text');
+
+    curtainText.textContent = actName;
+    curtain.classList.add('active');
+
+    setTimeout(() => {
+      curtain.classList.remove('active');
+      if (callback) callback();
+    }, 2000);
+  }
+
+  function loadBackground(imageName, container) {
+    container.style.backgroundImage = '';
+
+    const img = new Image();
+    img.onload = () => {
+      container.style.backgroundImage = `url(assets/${imageName})`;
+      container.style.backgroundSize = 'cover';
+      container.style.backgroundPosition = 'center';
+    };
+    img.onerror = () => {
+      const fallback = document.createElement('div');
+      fallback.textContent = `${imageName}`;
+      fallback.style.textAlign = 'center';
+      fallback.style.color = 'white';
+      fallback.style.fontSize = '1.5rem';
+      container.appendChild(fallback);
+    };
+    img.src = `assets/${imageName}`;
+  }
+
+  function playMusic(musicFile) {
+    try {
+      const audio = new Audio(`assets/${musicFile}`);
+      audio.volume = settings.volume / 100;
+      audio.loop = true;
+      audio.play().catch(e => console.log('Auto-play prevented:', e));
+    } catch {
+      const musicError = document.createElement('div');
+      musicError.textContent = `${musicFile}`;
+      musicError.style.color = 'white';
+      document.body.appendChild(musicError);
+    }
+  }
+
+  function createObjects(objects, container) {
+    objects.forEach(obj => {
+      const object = document.createElement('div');
+      object.className = 'object';
+      object.style.left = `${obj.x}px`;
+      object.style.top = `${obj.y}px`;
+      object.dataset.type = obj.type;
+
+      if (obj.type === 'health') {
+        object.style.background = '#00C853';
+      } else if (obj.type === 'doubleJump') {
+        object.style.background = '#FFD600';
+      } else if (obj.type === 'memory') {
+        object.style.background = '#FF4081';
+      }
+
+      container.appendChild(object);
+    });
+  }
+
+  function initPlayer(container) {
+    const player = document.createElement('div');
+    player.className = 'player';
+    container.appendChild(player);
+
+    playerPosition = { x: 100, y: 100 };
+    velocityY = 0;
+    isGrounded = false;
+    currentHealth = 100;
+    updateHealth();
+
+    document.addEventListener('keydown', (e) => {
+      keys[e.key] = true;
+    });
+
+    document.addEventListener('keyup', (e) => {
+      keys[e.key] = false;
+    });
+
+    gameLoop();
+  }
+
+  function handleCubeInteraction() {
+    if (!currentCube) return;
+
+    const cubeRect = currentCube.getBoundingClientRect();
+    const playerRect = {
+      x: playerPosition.x,
+      y: playerPosition.y,
+      width: 40,
+      height: 40
+    };
+
+    // Verificar proximidad
+    if (Math.abs(playerRect.x - cubeRect.x) < 50 &&
+      Math.abs(playerRect.y - cubeRect.y) < 50) {
+      if (!isCarrying) {
+        isCarrying = true;
+        currentCube.classList.add('carried');
+      } else {
+        isCarrying = false;
+        currentCube.classList.remove('carried');
+        currentCube.style.left = `${playerPosition.x}px`;
+        currentCube.style.top = `${playerPosition.y}px`;
+        checkCubeOnDoor();
+      }
+    }
+  }
+
+  function checkCubeOnDoor() {
+    const cube = document.querySelector('.cube');
+    const door = document.querySelector('.door');
+
+    if (cube && door) {
+      const cubeRect = cube.getBoundingClientRect();
+      const doorRect = door.getBoundingClientRect();
+
+      if (cubeRect.x > doorRect.x - 30 && cubeRect.x < doorRect.x + 30 &&
+        cubeRect.y > doorRect.y - 30 && cubeRect.y < doorRect.y + 30) {
+        nextAct();
+      }
+    }
+  }
+
+  function handleDecision(effect) {
+    if (effect === 'hard') {
+      enemySpeed *= 1.5;
+      showDialog('decisionHard');
+    } else {
+      enemySpeed *= 0.75;
+      showDialog('decisionEasy');
+    }
+  }
+
+  function createSpikes(spikes, container) {
+    spikes.forEach(spike => {
+      const spikeElement = document.createElement('div');
+      spikeElement.className = 'moving-spike';
+      spikeElement.style.left = `${spike.x}px`;
+      spikeElement.style.top = `${spike.y}px`;
+      container.appendChild(spikeElement);
+    });
+  }
+
+  function handleControls() {
+    const speed = MOVE_SPEED;
+    if (keys['ArrowLeft'] || keys['a']) playerPosition.x -= speed;
+    if (keys['ArrowRight'] || keys['d']) playerPosition.x += speed;
+    if ((keys['ArrowUp'] || keys['w'] || keys[' ']) && isGrounded) {
+      velocityY = JUMP_FORCE;
+      isGrounded = false;
+    }
+    if (keys['e']) handleCubeInteraction();
   }
 
   function gameLoop() {
