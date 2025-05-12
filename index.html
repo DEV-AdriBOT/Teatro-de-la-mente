@@ -7,6 +7,79 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    /* Nuevos estilos añadidos */
+    .cube {
+      position: absolute;
+      width: 35px;
+      height: 35px;
+      background: #FFD700;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      z-index: 3;
+    }
+
+    .cube.carried {
+      transform: scale(0.8);
+      filter: brightness(1.2);
+    }
+
+    .pressure-plate {
+      position: absolute;
+      width: 60px;
+      height: 20px;
+      background: #607D8B;
+      border-radius: 4px 4px 0 0;
+      z-index: 2;
+    }
+
+    .activated {
+      background: #4CAF50 !important;
+    }
+
+    .spike-wall {
+      position: absolute;
+      width: 40px;
+      height: 100%;
+      background: repeating-linear-gradient(
+        45deg,
+        #d32f2f,
+        #d32f2f 10px,
+        #b71c1c 10px,
+        #b71c1c 20px
+      );
+    }
+
+    .moving-spike {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: #d32f2f;
+      clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+      animation: moveSpike 2s infinite linear;
+    }
+
+    @keyframes moveSpike {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(200px); }
+      100% { transform: translateX(0); }
+    }
+
+    .decision-point {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 235, 59, 0.3);
+      border-radius: 50%;
+      animation: pulseDecision 2s infinite;
+    }
+
+    @keyframes pulseDecision {
+      0% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.1); opacity: 0.6; }
+      100% { transform: scale(1); opacity: 0.3; }
+    }
+    
     :root {
       --primary: #4db6ac;
       --primary-light: #80cbc4;
@@ -874,12 +947,10 @@
 
           // Middle section
           { x: 150, y: 400, width: 120, height: 20 },
-          { x: 400, y: 380, width: 100, height: 20, spikes: true },
           { x: 550, y: 350, width: 150, height: 20, moving: true },
 
           // Upper section
           { x: 200, y: 280, width: 100, height: 20 },
-          { x: 350, y: 250, width: 120, height: 20, spikes: true },
           { x: 500, y: 220, width: 100, height: 20 },
 
           // Final section
@@ -957,16 +1028,6 @@
 
       if (plat.moving) {
         platform.style.animationDuration = `${Math.random() * 3 + 2}s`;
-      }
-
-      if (plat.spikes) {
-        const spikeCount = Math.floor(plat.width / 40);
-        for (let i = 0; i < spikeCount; i++) {
-          const spike = document.createElement('div');
-          spike.className = 'spike';
-          spike.style.left = `${i * 40 + 20}px`;
-          platform.appendChild(spike);
-        }
       }
 
       container.appendChild(platform);
