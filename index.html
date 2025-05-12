@@ -1520,51 +1520,42 @@
       }
     }
 
-    function exitGame() {
+    function exitG    function exitGame() {
       document.body.style.opacity = '0';
       setTimeout(() => {
-        window.close();  document.addEventListener(\'DOMContentLoaded\
-', () => {
-          loadSettings();
-          changeLanguage(currentLanguage);
+        window.close();
+      }, 500);
+    }
 
-          // Main Menu Buttons
-          const playBtn = document.getElementById(\'playBtn\');
-          if (playBtn) playBtn.addEventListener(\'click\', () => showScreen(\'gameScreen\'));
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSettings();
+      changeLanguage(currentLanguage);
 
-          const settingsBtn = document.getElementById(\'settingsBtn\');
-          if (settingsBtn) settingsBtn.addEventListener(\'click\', () => showScreen(\'settingsScreen\'));
+      // Main Menu Buttons
+      document.getElementById('playBtn')?.addEventListener('click', () => showScreen('gameScreen'));
+      document.getElementById('settingsBtn')?.addEventListener('click', () => showScreen('settingsScreen'));
+      document.getElementById('exitBtn')?.addEventListener('click', exitGame);
 
-          const exitBtn = document.getElementById(\'exitBtn\');
-          if (exitBtn) exitBtn.addEventListener(\'click\', exitGame);
+      // Settings Screen Buttons
+      document.getElementById('saveSettingsBtn')?.addEventListener('click', saveSettings);
+      document.getElementById('backToStartBtn')?.addEventListener('click', () => showScreen('startScreen'));
 
-          // Settings Screen Buttons
-          const saveSettingsBtn = document.getElementById(\'saveSettingsBtn\');
-          if (saveSettingsBtn) saveSettingsBtn.addEventListener(\'click\', saveSettings);
+      // In-Game Buttons
+      document.getElementById('fullscreenBtn')?.addEventListener('click', toggleFullscreen);
+      document.getElementById('skipBtn')?.addEventListener('click', closeDialog);
 
-          const backToStartBtn = document.getElementById(\'backToStartBtn\');
-          if (backToStartBtn) backToStartBtn.addEventListener(\'click\', () => showScreen(\'startScreen\'));
+      // Volume control
+      document.getElementById('volumeSlider')?.addEventListener('input', (e) => {
+        settings.volume = e.target.value;
+      });
 
-          // In-Game Buttons
-          const fullscreenBtn = document.getElementById(\'fullscreenBtn\');
-          if (fullscreenBtn) fullscreenBtn.addEventListener(\'click\', toggleFullscreen);
-
-          const skipBtn = document.getElementById(\'skipBtn\');
-          if (skipBtn) skipBtn.addEventListener(\'click\', closeDialog);
-
-          // Other Event Listeners
-          document.addEventListener(\'keydown\', (e) => {
-          if (e.key === \'Escape\' && document.fullscreenElement) {
+      // Fullscreen ESC handler
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.fullscreenElement) {
           toggleFullscreen();
         }
       });
-
-      const volumeSlider = document.getElementById(\'volumeSlider\');
-      if (volumeSlider) volumeSlider.addEventListener(\'input\', (e) => {
-      settings.volume = e.target.value;
-      // Potentially update audio volume immediately if an audio element is playing
     });
-  });
-</script>
+</script></script>
 </body>
 </html>
